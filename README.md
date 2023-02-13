@@ -3,7 +3,7 @@ This Jupyter Notebook allows the domain detection and annotation of protein sequ
 
 Make sure to have following tools installed in the same directory as the Jupyter Notebook:
 
-1. CD-HIT. 
+1. CD-HIT
 
 For MacOS:
 
