@@ -1,9 +1,11 @@
 # Domain Analysis of CAZymes
 This Jupyter Notebook allows the domain detection and annotation of protein sequences from any CAZy family.
 
+## Requirements
+
 Make sure to have following tools installed in the same directory as the Jupyter Notebook:
 
-## CD-HIT
+### 1. CD-HIT
 
 #### MacOS
 
@@ -51,11 +53,11 @@ Make sure to have following tools installed in the same directory as the Jupyter
   
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
-## Clustal Omega. 
+### 2. Clustal Omega 
 
 Precompiled binary can be downloaded here: http://www.clustal.org/omega/
 
-## FastTree. 
+### 3. FastTree 
 
 #### MacOS
 
@@ -94,6 +96,58 @@ Precompiled binary can be downloaded here: http://www.clustal.org/omega/
    Download the FastTree Windows binary from the FastTree website at http://www.microbesonline.org/fasttree/#Download.
 
    Extract the FastTree executable from the downloaded ZIP file.
+
+
+
+## Before you start
+Your directory shoud look like this:
+
+<img width="439" alt="image" src="https://user-images.githubusercontent.com/72694200/218505704-bc0f40ef-61bd-4e03-96d6-7a085032b841.png">
+
+Also, for large families, avoid your computer entering sleep or stand-by mode since this will interupt the run. Change the settings in your computer or caffeinate your system.
+
+#### MacOS
+
+Install caffeinate package by running in your Terminal:
+
+    brew install caffeinate
+    
+Start the package by running:
+
+    caffeinate -d
+    
+Stop by running: 
+
+    ctrl + C
+
+#### Linux
+
+Install caffeinate package by running in your Terminal:
+
+    sudo apt-get install caffeinate
+    
+Start the package by running:
+
+    caffeinate -d
+    
+Stop by running: 
+
+    ctrl + C
+#### Windows
+
+Note: The caffeinate package is not available for Windows. However, you can use a similar feature called "powercfg" to prevent the system from going to sleep.
+
+Open the Command Prompt application.
+
+Type following line to see the current power requests:
+   
+    powercfg /requests
+
+Type following line, followed by the type of request you want to override (e.g., "system" or "display"):
+ 
+    powercfg /requestsoverride
+
+To stop the power request override, type in "powercfg /requestsoverride" followed by the type of request and the "/remove" argument
 
 
 
