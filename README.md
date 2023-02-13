@@ -3,9 +3,9 @@ This Jupyter Notebook allows the domain detection and annotation of protein sequ
 
 Make sure to have following tools installed in the same directory as the Jupyter Notebook:
 
-#1. CD-HIT
+## CD-HIT
 
-For MacOS:
+#### MacOS
 
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
@@ -19,7 +19,7 @@ For MacOS:
 
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
-For Linux:
+#### Linux
 
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
@@ -33,7 +33,7 @@ For Linux:
    
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
 
-For Windows:
+#### Windows
 
   Download and install Cygwin from https://www.cygwin.com/.
 
@@ -51,13 +51,13 @@ For Windows:
   
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
-2. Clustal Omega. 
+## Clustal Omega. 
 
 Precompiled binary can be downloaded here: http://www.clustal.org/omega/
 
-3. FastTree. 
+## FastTree. 
 
-For MacOS:
+#### MacOS
 
    Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
    
@@ -75,7 +75,7 @@ For MacOS:
     
      brew install fasttree
 
-For Linux:
+#### Linux
 
   Download the FastTree source code from the FastTree website at http://www.microbesonline.org/fasttree/.
 
@@ -89,7 +89,7 @@ For Linux:
     
   After the compilation process completes, you will find the FastTree executable file in the "FastTree-2.1.13" directory.
   
-For Windows:
+#### Windows
 
    Download the FastTree Windows binary from the FastTree website at http://www.microbesonline.org/fasttree/#Download.
 
