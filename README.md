@@ -1,7 +1,7 @@
 # Domain-Analysis-of-CAZymes
 This Jupyter Notebook allows the domain detection and annotation of protein sequences from any CAZy family.
 
-Make sure to have following tools installed in the same directory as this Notebook:
+Make sure to have following tools installed in the same directory as the Jupyter Notebook:
 
 1. CD-HIT. 
 
