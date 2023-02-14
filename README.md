@@ -8,7 +8,14 @@ Make sure to have following tools installed in the same directory as the Jupyter
 ### 1. CD-HIT
 
 #### MacOS
-
+  Download the source code from this GitHub repository and navigate to the source directory. 
+  
+  Write following command in your Terminal to compile the code:
+  
+     make
+     
+  Or
+  
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
   Open a terminal window and navigate to the directory where you downloaded the source code.
@@ -22,7 +29,14 @@ Make sure to have following tools installed in the same directory as the Jupyter
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
 #### Linux
-
+ Download the source code from this GitHub repository and navigate to the source directory. 
+  
+  Write following command in your Terminal to compile the code:
+  
+     make
+     
+  Or
+  
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
   Open a terminal window and navigate to the directory where you downloaded the source code.
@@ -61,9 +75,17 @@ Precompiled binary can be downloaded here: http://www.clustal.org/omega/
 
 #### MacOS
 
+  Download the source code from this GitHub repository and navigate to the source directory. 
+  
+  Write following command in your Terminal to compile the code:
+  
+     make -f Makefile.GCC
+   
+   Or
+
    Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
    
-   or
+   Or
    
    Open a terminal window and install the Xcode Command Line Tools by typing the following command:
    
@@ -78,6 +100,18 @@ Precompiled binary can be downloaded here: http://www.clustal.org/omega/
      brew install fasttree
 
 #### Linux
+
+  Download the source code from this GitHub repository and navigate to the source directory. 
+  
+  Write following command in your Terminal to compile the code:
+  
+     make -f Makefile.GCC
+   
+  Or
+   
+  Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
+  
+  Or
 
   Download the FastTree source code from the FastTree website at http://www.microbesonline.org/fasttree/.
 
