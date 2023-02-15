@@ -183,5 +183,9 @@ Type following line, followed by the type of request you want to override (e.g.,
 
 To stop the power request override, type in "powercfg /requestsoverride" followed by the type of request and the "/remove" argument
 
+## Output
 
+### Database
+
+To open the results in the database, download SQLite from: https://sqlitebrowser.org/
 
