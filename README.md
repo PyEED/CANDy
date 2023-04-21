@@ -189,3 +189,19 @@ To stop the power request override, type in "powercfg /requestsoverride" followe
 
 To open the results in the database, download SQLite from: https://sqlitebrowser.org/
 
+## Acknowledgements
+
+CANDy communicates with and/or references the following separate libraries, packages abd tools:
+
+- [Biopython](https://biopython.org/)
+- [pandas](https://pandas.pydata.org/)
+- [tqdm](https://github.com/tqdm/tqdm) 
+- [sqlitebrowser](https://sqlitebrowser.org/)
+- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [sdRDM](https://github.com/JR-1991/software-driven-rdm)
+- [requests](https://requests.readthedocs.io/en/latest/)
+- [ete3](http://etetoolkit.org/)
+- [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true)
+- [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
+- [RAxML-NG](https://academic.oup.com/bioinformatics/article/35/21/4453/5487384?login=true)
+
