@@ -191,7 +191,7 @@ To open the results in the database, download SQLite from: https://sqlitebrowser
 
 ## Acknowledgements
 
-CANDy communicates with and/or references the following separate libraries, packages abd tools:
+CANDy communicates with and/or references the following separate libraries, packages and tools:
 
 - [Biopython](https://biopython.org/)
 - [pandas](https://pandas.pydata.org/)
