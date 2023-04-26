@@ -1,5 +1,5 @@
-# Domain Analysis of CAZymes
-This Jupyter Notebook allows the domain detection and annotation of protein sequences from any CAZy family.
+# Carbohydrate Active eNzyme Doman analYsis tool (CANDy)
+This Jupyter Notebook allows the domain detection and annotation of protein sequences from any [CAZy](http://www.cazy.org/) family.
 
 ## Requirements
 
@@ -8,14 +8,6 @@ Make sure to have following tools installed in the same directory as the Jupyter
 ### 1. CD-HIT
 
 #### MacOS
-  Download the source code from this GitHub repository and navigate to the source directory. 
-  
-  Write following command in your Terminal to compile the code:
-  
-     make
-     
-  Or
-  
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
   Open a terminal window and navigate to the directory where you downloaded the source code.
@@ -29,14 +21,6 @@ Make sure to have following tools installed in the same directory as the Jupyter
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
 #### Linux
- Download the source code from this GitHub repository and navigate to the source directory. 
-  
-  Write following command in your Terminal to compile the code:
-  
-     make
-     
-  Or
-  
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
   Open a terminal window and navigate to the directory where you downloaded the source code.
@@ -67,21 +51,13 @@ Make sure to have following tools installed in the same directory as the Jupyter
   
   After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
   
-### 2. Clustal Omega 
+### 2. MAFFT
 
-Precompiled binary can be downloaded here: http://www.clustal.org/omega/
+Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/software/
 
 ### 3. FastTree 
 
 #### MacOS
-
-  Download the source code from this GitHub repository and navigate to the source directory. 
-  
-  Write following command in your Terminal to compile the code:
-  
-     make -f Makefile.GCC
-   
-   Or
 
    Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
    
@@ -101,14 +77,6 @@ Precompiled binary can be downloaded here: http://www.clustal.org/omega/
 
 #### Linux
 
-  Download the source code from this GitHub repository and navigate to the source directory. 
-  
-  Write following command in your Terminal to compile the code:
-  
-     make -f Makefile.GCC
-   
-  Or
-   
   Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
   
   Or
