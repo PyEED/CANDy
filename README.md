@@ -173,3 +173,22 @@ CANDy communicates with and/or references the following separate libraries, pack
 - [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
 - [RAxML-NG](https://academic.oup.com/bioinformatics/article/35/21/4453/5487384?login=true)
 
+## Legal terms
+
+### License and Disclaimer
+
+This Jupyter Notebook is licensed under [MIT](https://github.com/PyEED/CANDy/blob/main/SECURITY.md#mit-license).
+
+This Notebook and other information provided is for theoretical utilisation only, caution should be exercised in its use. It is provided ‘as-is’ without any warranty of any kind, whether expressed or implied. Information is not intended to be a substitute for professional medical advice, diagnosis, or treatment, and does not constitute medical or other professional advice.
+
+### Third-party software
+
+Use of the third-party software, libraries or code referred to in the [Acknowledgements section](https://github.com/PyEED/CANDy#acknowledgements) in the CANDy README may be governed by separate terms and conditions or license provisions. Your use of the third-party software, libraries or code is subject to any such terms and you should check that you can comply with any applicable restrictions or terms and conditions before use.
+
+### Databases
+
+The following databases are used by CANDy, and are available with reference to the following:
+- UniProt: (unmodified), by The UniProt Consortium, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/).
+- NCBI: (unmodified), by the National Library of Medicine, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
+- CAZy: (unmodified), by http://www.cazy.org/ and Elodie Drula, Marie-Line Garron, Suzan Dogan, Vincent Lombard, Bernard Henrissat, Nicolas Terrapon, The carbohydrate-active enzyme database: functions and literature, Nucleic Acids Research, Volume 50, Issue D1, 7 January 2022, Pages D571–D577, https://doi.org/10.1093/nar/gkab1045, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
+- InterPro: (unmodified), by EMBL-EBI, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
