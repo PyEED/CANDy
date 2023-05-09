@@ -104,9 +104,11 @@ Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/softw
 ## Before you start
 Your directory shoud look like this:
 
-<img width="439" alt="image" src="https://user-images.githubusercontent.com/72694200/218505704-bc0f40ef-61bd-4e03-96d6-7a085032b841.png">
+<img width="402" alt="image" src="https://github.com/PyEED/CANDy/assets/72694200/2c4e39ac-f6b3-4d57-b0d3-c761bd3da49e">
 
-Also, for large families, avoid your computer entering sleep or stand-by mode since this will interupt the run. Change the settings in your computer or caffeinate your system.
+
+
+Also, for large families, avoid your computer entering sleep or stand-by mode since this will interupt the run. Change the settings in your computer or [caffeinate](https://pypi.org/project/caffeinate/) your system.
 
 #### MacOS
 
@@ -156,6 +158,10 @@ To stop the power request override, type in "powercfg /requestsoverride" followe
 ### Database
 
 To open the results in the database, download SQLite from: https://sqlitebrowser.org/
+
+### (Annotated) Phylogenetic tree 
+
+To view the phylogenetic tree, several free services are available. The Notebook makes use of the ete3 package to visualize the tree in there. For a more interactive experience we recommend [iTOL](https://itol.embl.de/). The script outputs iTOL annotation file for the visualization of the protein domains and the activity of the included characterized sequences.
 
 ## Acknowledgements
 
