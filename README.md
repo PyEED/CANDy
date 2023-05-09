@@ -161,7 +161,7 @@ To open the results in the database, download SQLite from: https://sqlitebrowser
 
 ### (Annotated) Phylogenetic tree 
 
-To view the phylogenetic tree, several free services are available. The Notebook makes use of the ete3 package to visualize the tree in there. For a more interactive experience we recommend [iTOL](https://itol.embl.de/). The script outputs iTOL annotation file for the visualization of the protein domains and the activity of the included characterized sequences.
+To view the phylogenetic tree, several free services are available. The Notebook makes use of the ete3 package to visualize the annotated tree in there. For a more interactive experience we recommend [iTOL](https://itol.embl.de/). The script outputs iTOL annotation files for the visualization of the protein domains and the activity of the included characterized sequences.
 
 ![image](https://github.com/PyEED/CANDy/assets/72694200/bc8969ab-0181-4417-9678-c26e624a3d5e)
 
