@@ -179,7 +179,7 @@ CANDy communicates with and/or references the following separate libraries, pack
 - [ete3](http://etetoolkit.org/)
 - [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true)
 - [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
-- [RAxML-NG](https://academic.oup.com/bioinformatics/article/35/21/4453/5487384?login=true)
+- [FastTree](http://www.microbesonline.org/fasttree/)
 
 ## Legal terms
 
