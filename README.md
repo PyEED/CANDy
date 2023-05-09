@@ -104,7 +104,7 @@ Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/softw
 ## Before you start
 Your directory shoud look like this:
 
-<img width="402" alt="image" src="https://github.com/PyEED/CANDy/assets/72694200/2c4e39ac-f6b3-4d57-b0d3-c761bd3da49e">
+<img width="385" alt="image" src="https://github.com/PyEED/CANDy/assets/72694200/26370212-d8a8-42df-a0a8-917e2eae6d56">
 
 
 
