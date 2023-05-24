@@ -1,5 +1,5 @@
 # Carbohydrate Active eNzyme Domain analYsis tool (CANDy)
-This Jupyter Notebook allows the domain detection and annotation of protein sequences from any [CAZy](http://www.cazy.org/) family.
+CANDy boosts a fast, FAIR and seamless protein domain analysis of any [CAZy](http://www.cazy.org/) family. An online version is available on [Google Colab](https://colab.research.google.com/drive/1pxUSkl6Bv2JfAZ4-3ljsEdWlocqm_RXB?usp=sharing), yet for bigger families we recommend you downloading the Jupyter Notebook.
 
 ## Requirements
 
