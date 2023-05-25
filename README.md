@@ -37,7 +37,7 @@ Make sure to have following tools installed in the same directory as the Jupyter
 
   Download and install Cygwin from https://www.cygwin.com/.
 
-  During the installation process, make sure to select the "make" package.
+  During the installation process, make sure to select the "make" "gcc-g++" and "zlib" packages.
 
   Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
 
