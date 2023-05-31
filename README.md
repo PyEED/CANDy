@@ -61,12 +61,18 @@ Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/softw
 
 
 
-## Before you start
+## Running CANDy
 Your directory shoud look like this:
 
 <img width="385" alt="image" src="https://github.com/PyEED/CANDy/assets/72694200/26370212-d8a8-42df-a0a8-917e2eae6d56">
 
 
+This Notebook uses several Python packages. To avoid compatibility issues we recommend running this Notebook in a __virtual environment__.
+- Therefore, install [Anaconda](https://www.anaconda.com/) and follow the installation instructions.
+- Go to environments and click 'create'. Give your environment a name, for example '__myenv__'. The virual environment will be launched automatically.
+- Go to the package search bar and search for '__ipywidgets__'. Download the package to be able to use the interactive widgets in this Notebook. Repeat for the '__h5py__' package.
+- Next, go back to the home page and install __Jupyter Notebook__. Once completed, press launch and go to the directory where you saved this Notebook. 
+- Verify that you see the name of the virtual enivronment on the right top of the Notebook, for example: __Python (myenv)__. If that's not the case, go to Kernel and choose the environment.
 
 Also, for large families, avoid your computer entering sleep or stand-by mode since this will interupt the run. Change the settings in your computer or [caffeinate](https://pypi.org/project/caffeinate/) your system.
 
