@@ -7,53 +7,13 @@ Make sure to have following tools installed in the same directory as the Jupyter
 
 ### 1. CD-HIT
 
-#### MacOS
-  Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
-
-  Open a terminal window and navigate to the directory where you downloaded the source code.
-
-  Type the following commands in the terminal to compile the CD-HIT package:
-  
-    tar xvf cd-hit-v4.8.1-2019-0228.tar.gz
-    cd cd-hit-v4.8.1-2019-0228
-    make
-
-  After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
-  
-#### Linux
-  Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
-
-  Open a terminal window and navigate to the directory where you downloaded the source code.
-
-  Type the following commands in the terminal to compile the CD-HIT package:
-  
-    tar xvf cd-hit-v4.8.1-2019-0228.tar.gz
-    cd cd-hit-v4.8.1-2019-0228
-    make
-   
-  After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
-
-#### Windows
-
-  Download and install Cygwin from https://www.cygwin.com/.
-
-  During the installation process, make sure to select the "make" "gcc-g++" and "zlib" packages.
-
-  Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases.
-
-  Open a Cygwin terminal window and navigate to the directory where you downloaded the source code.
-
-  Type the following commands in the terminal to compile the CD-HIT package:
-  
-    tar xvf cd-hit-v4.8.1-2019-0228.tar.gz
-    cd cd-hit-v4.8.1-2019-0228
-    make
-  
-  After the compilation process completes, you will find the CD-HIT executable file in the "cd-hit-v4.8.1-2019-0228" directory.
+Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases and follow the [installation instructions](https://github.com/weizhongli/cdhit/wiki/2.-Installation). 
   
 ### 2. MAFFT
 
-Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/software/
+Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/software/. Change the installation directory to the path where the Notebook is stored or manually move the executable from the default directory. You can find the location of MAFFT by typing the following command in your terminal:
+
+    where mafft
 
 ### 3. FastTree 
 
