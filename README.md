@@ -146,6 +146,8 @@ CANDy communicates with and/or references the following separate libraries, pack
 - [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true)
 - [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
 - [FastTree](http://www.microbesonline.org/fasttree/)
+- [NetworkX](https://networkx.org/)
+- [Matplotlib](https://matplotlib.org/)
 
 ## Legal terms
 
