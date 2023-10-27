@@ -129,7 +129,13 @@ To open the results in the database, download SQLite from: https://sqlitebrowser
 
 To view the phylogenetic tree, several free services are available. The Notebook makes use of the ete3 package to visualize the annotated tree in there. For a more interactive experience we recommend [iTOL](https://itol.embl.de/). The script outputs iTOL annotation files for the visualization of the protein domains and the activity of the included characterized sequences.
 
-![image](https://github.com/PyEED/CANDy/assets/72694200/bc8969ab-0181-4417-9678-c26e624a3d5e)
+![image](https://github.com/PyEED/CANDy/assets/72694200/889b74eb-f740-4aff-80a0-855359099dc0)
+
+### Protein domain co-occurence network
+
+CANDy offers users a co-occurrence network that visually represents both the frequency of different domain types and the degree to which they are interconnected. A simple visualisation is offered in the Notebook, but for a more interactive experience we recommend using [Cytoscape](https://cytoscape.org/) (yFiles Organic Layout). 
+
+![image](https://github.com/PyEED/CANDy/assets/72694200/cd20a756-7ded-4964-a9b9-04f7d83698a1)
 
 ## Acknowledgements
 
