@@ -121,6 +121,7 @@ To stop the power request override, type in "powercfg /requestsoverride" followe
 
 ## Output
 
+When running the Google Colab version of CANDy, results containing the FATSA files, SQLite database, MSA, phylogenetic tree (in Newick format) and iTOL annotation files are automatically downloaded in a Zip file. When running CANDy locally, these outputs are stores in the same directory as the Jupyter Notebook.
 ### Database
 
 To open the results in the database, download SQLite from: https://sqlitebrowser.org/
