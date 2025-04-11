@@ -1,5 +1,5 @@
 # Carbohydrate Active eNzyme Domain analYsis tool (CANDy) - automated analysis of domain architectures in carbohydrate-active enzymes
-CANDy boosts a fast, FAIR and seamless protein domain analysis of any [CAZy](http://www.cazy.org/) family. An online version is available on [Google Colab](https://colab.research.google.com/drive/1pxUSkl6Bv2JfAZ4-3ljsEdWlocqm_RXB?usp=sharing), yet for bigger families we recommend you downloading the Jupyter Notebook.
+CANDy boosts a fast, FAIR and seamless protein domain analysis of any [CAZy](http://www.cazy.org/) family. Check the latest online version  on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing), yet for bigger families we recommend you downloading the Jupyter Notebook.
 
 ## Requirements
 
