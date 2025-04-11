@@ -156,6 +156,12 @@ CANDy communicates with and/or references the following separate libraries, pack
 - [NetworkX](https://networkx.org/)
 - [Matplotlib](https://matplotlib.org/)
 
+## Citation
+
+If you find CANDy useful, please cite it as:
+
+Windels A, Franceus J, Pleiss J, Desmet T. CANDy: Automated analysis of domain architectures in carbohydrate-active enzymes. PLoS One. 2024 Jul 11;19(7):e0306410. doi: 10.1371/journal.pone.0306410. PMID: 38990885; PMCID: PMC11238990.
+
 ## Legal terms
 
 ### License and Disclaimer
