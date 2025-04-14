@@ -1,6 +1,8 @@
 # Carbohydrate Active eNzyme Domain analYsis tool (CANDy) - automated analysis of domain architectures in carbohydrate-active enzymes
 CANDy boosts a fast, FAIR and seamless protein domain analysis of any [CAZy](http://www.cazy.org/) family. Check the latest online version  on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing), yet for bigger families we recommend you downloading the Jupyter Notebook.
 
+#### April 2025 update : We included MMseqs2 as an alternative clustering option for CD-HIT. Additionally, the domain name curation step is now fully automated by employing Gemini 2.0 flash. Users still have the option to perform this step manually. (Only available on Colab)
+
 ## Requirements
 
 Make sure to have following tools installed in the same directory as the Jupyter Notebook:
