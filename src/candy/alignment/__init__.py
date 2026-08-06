@@ -15,6 +15,10 @@ class AlignmentTool(Protocol):
 
 
 def get_alignment_tool(name: str) -> AlignmentTool:
+    if name == "famsa":
+        from candy.alignment.famsa import FamsaAligner
+
+        return FamsaAligner()
     if name == "mafft":
         from candy.alignment.mafft import MafftAligner
 

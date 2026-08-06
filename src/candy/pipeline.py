@@ -67,7 +67,23 @@ def _prepare_domain_detection_input(
     return proteins
 
 
+def _unique_jobname(output_dir: Path, jobname: str) -> str:
+    """Suffix jobname with an incrementing number if it's already taken.
+
+    Avoids silently mixing a new run's output files into a previous run's
+    directory (the notebook did the same, appending _0, _1, ... on collision).
+    """
+    if not (output_dir / jobname).exists():
+        return jobname
+
+    n = 0
+    while (output_dir / f"{jobname}_{n}").exists():
+        n += 1
+    return f"{jobname}_{n}"
+
+
 def run_pipeline(config: PipelineConfig) -> PipelineResult:
+    config.jobname = _unique_jobname(config.output_dir, config.jobname)
     jobname_dir = config.output_dir / config.jobname
     jobname_dir.mkdir(parents=True, exist_ok=True)
 

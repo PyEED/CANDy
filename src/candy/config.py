@@ -10,6 +10,7 @@ flags, or built in a test without touching stdin.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -59,6 +60,38 @@ DEFAULT_DATABASE_PREFERENCE: list[str] = [
     "PROFILE",
     "PROSITE",
 ]
+
+
+def reorder_database_preference(
+    priority: Sequence[str], base: Sequence[str] = DEFAULT_DATABASE_PREFERENCE
+) -> list[str]:
+    """Move the named databases (in the given order) to the front of ``base``.
+
+    Databases not named in ``priority`` keep their existing relative order,
+    appended after the ones that were moved -- so callers only need to name
+    the databases they actually want to reprioritize, not repeat the full
+    13-item list every time.
+
+    Raises:
+        ValueError: if ``priority`` contains a name not present in ``base``.
+    """
+    normalized_priority = [name.strip().upper() for name in priority]
+    valid = set(base)
+    unknown = [name for name in normalized_priority if name not in valid]
+    if unknown:
+        raise ValueError(
+            f"Unknown database name(s): {', '.join(unknown)}. Valid names: {', '.join(base)}."
+        )
+
+    front: list[str] = []
+    seen: set[str] = set()
+    for name in normalized_priority:
+        if name not in seen:
+            front.append(name)
+            seen.add(name)
+
+    rest = [name for name in base if name not in seen]
+    return front + rest
 
 
 @dataclass
@@ -132,8 +165,8 @@ class PipelineConfig:
     # BLAST fallback when a characterized sequence has no UniParc entry.
 
     build_tree: bool = False
-    alignment_tool: str = "mafft"
-    tree_tool: str = "fasttree"
+    alignment_tool: str = "famsa"
+    tree_tool: str = "veryfasttree"
 
     def __post_init__(self) -> None:
         self.output_dir = Path(self.output_dir)

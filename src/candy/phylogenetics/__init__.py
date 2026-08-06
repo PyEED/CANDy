@@ -15,6 +15,10 @@ class TreeBuilder(Protocol):
 
 
 def get_tree_builder(name: str) -> TreeBuilder:
+    if name == "veryfasttree":
+        from candy.phylogenetics.veryfasttree_builder import VeryFastTreeBuilder
+
+        return VeryFastTreeBuilder()
     if name == "fasttree":
         from candy.phylogenetics.fasttree import FastTreeBuilder
 

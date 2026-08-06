@@ -29,6 +29,9 @@ dependencies = [
     "numpy>=1.26",
     "typer>=0.12",
     "lxml>=5.0",
+    "pyfamsa>=0.5",
+    "veryfasttree>=4.0",
+    "platformdirs>=4.0",
 ]
 
 [project.optional-dependencies]
@@ -46,6 +49,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not integration'"
 markers = [
     "integration: requires network access or external CLI tools (mafft, fasttree, mmseqs2, cd-hit)",
 ]

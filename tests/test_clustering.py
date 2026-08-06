@@ -43,7 +43,7 @@ def test_mmseqs2_builds_expected_command_and_copies_result(tmp_path):
         with open(f"{prefix}_rep_seq.fasta", "w") as f:
             f.write(">rep\nMKV\n")
 
-    with patch("candy.clustering.mmseqs2.require_binary", return_value="/usr/bin/mmseqs"), patch(
+    with patch("candy.clustering.mmseqs2.resolve_mmseqs2_binary", return_value="/usr/bin/mmseqs"), patch(
         "candy.clustering.mmseqs2.run_tool", side_effect=fake_run_tool
     ) as mock_run:
         Mmseqs2Clusterer().cluster(input_fasta, output_fasta, config)

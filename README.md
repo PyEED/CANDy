@@ -6,14 +6,28 @@ CANDy is a fast, FAIR and seamless protein domain analysis tool for any [CAZy](h
 
 ## Installation
 
-CANDy depends on a handful of external bioinformatics tools (CD-HIT or MMseqs2 for clustering, MAFFT for alignment, FastTree for phylogenetics) that aren't distributed via PyPI. The supported install path is a conda environment that provides them, with CANDy itself installed via pip into that environment:
+Not yet published to PyPI -- install directly from this repository for now:
 
 ```bash
-conda env create -f environment.yml
-conda activate candy
+git clone https://github.com/PyEED/CANDy.git
+cd CANDy
+git checkout package-upgrade
+pip install -e .
 ```
 
-This installs the external tools via bioconda and CANDy itself (editable) via pip. If you already have those tools on your PATH through some other means, you can also just `pip install -e .` directly.
+(Once published, this will just be `pip install candy-cazyme`.) That's it for most users -- CANDy's default toolchain is fully bundled:
+
+- **Clustering**: [MMseqs2](https://github.com/soedinglab/MMseqs2) -- auto-downloaded and cached on first use (no conda needed). On Linux/macOS this just works. On **Windows**, MMseqs2's clustering workflows internally need a POSIX shell; the official Windows build handles this itself by installing a small helper (`busybox`) the first time it runs, which may ask for administrator permission **once** -- never again after that. (This mirrors upstream: MMseqs2's own docs list WSL as the recommended Windows path and this static build as the fallback for anyone who can't use WSL.)
+- **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.
+- **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed.
+
+If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), a conda environment with those is still provided:
+
+```bash
+conda env create -f environment.yml   # only needed for CD-HIT as a clustering alternative to MMseqs2
+conda activate candy
+```
+and pass `--clustering-software cd-hit` / build a `PipelineConfig` with `alignment_tool="mafft"`, `tree_tool="fasttree"`.
 
 To also enable automated Gemini-based domain-name curation:
 
@@ -21,19 +35,28 @@ To also enable automated Gemini-based domain-name curation:
 pip install -e ".[gemini]"
 ```
 
+If you'd rather not have CANDy download anything automatically (e.g. air-gapped environments), set `CANDY_NO_AUTO_DOWNLOAD=1` -- clustering will then require `mmseqs`/`cd-hit` already on PATH.
+
 ## Usage
 
 ### Command line
 
 ```bash
-# Query a CAZy family directly
-candy run --jobname my_gh5_run --family GH5 --email you@example.com --tree
+# Query a CAZy family directly -- TARGET is auto-detected as a family code or a file path
+candy GH173 --email you@example.com --tree
+
+# Restrict to a taxonomic subset, and use a stricter clustering cutoff
+candy GH173 --email you@example.com --taxonomy Bacteria --cluster-identity 90
+
+# Reprioritize which InterPro database wins when two disagree on a domain boundary
+# (only the databases you name move; everything else keeps its default order)
+candy GH173 --email you@example.com --db-preference PFAM,SMART
 
 # Analyse your own FASTA file instead
-candy run --jobname my_custom_run --fasta my_sequences.fasta --tree
+candy my_sequences.fasta --tree
 ```
 
-Run `candy run --help` for the full list of options (taxonomy subset, clustering software/cutoff, BLAST identity threshold, max domain length, domain-overlap threshold, curation backend, ...).
+`--email` falls back to the `CANDY_EMAIL` environment variable, then an interactive prompt, so `export CANDY_EMAIL=you@example.com` once and just run `candy GH173` from then on. Run `candy --help` for the full list of options.
 
 ### Python API
 
@@ -58,7 +81,7 @@ Results are written to `{output_dir}/{jobname}/`:
 - FASTA files for each processing stage
 - A SQLite database (`{jobname}_db.db`) containing the domain annotations -- open it with [DB Browser for SQLite](https://sqlitebrowser.org/)
 - A protein domain co-occurrence network (`{jobname}_domain_cooccurence_network.graphml`) -- open it in [Cytoscape](https://cytoscape.org/) (yFiles Organic Layout recommended)
-- If `--tree`/`build_tree=True`: a MAFFT alignment, a FastTree phylogenetic tree (Newick), and [iTOL](https://itol.embl.de/) annotation files for the domain architecture and (for CAZy family queries) characterized-enzyme activity
+- If `--tree`/`build_tree=True`: a FAMSA alignment, a VeryFastTree phylogenetic tree (Newick), and [iTOL](https://itol.embl.de/) annotation files for the domain architecture and (for CAZy family queries) characterized-enzyme activity
 
 ## Acknowledgements
 
@@ -70,10 +93,9 @@ CANDy communicates with and/or references the following separate libraries, pack
 - [sqlitebrowser](https://sqlitebrowser.org/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
 - [requests](https://requests.readthedocs.io/en/latest/)
-- [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true)
-- [MMseqs2](https://www.nature.com/articles/nbt.3988)
-- [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
-- [FastTree](http://www.microbesonline.org/fasttree/)
+- [MMseqs2](https://www.nature.com/articles/nbt.3988) / [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true) (clustering)
+- [FAMSA](https://academic.oup.com/nar/article/44/16/e121/2468101) via [pyfamsa](https://github.com/althonos/pyfamsa) / [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true) (alignment)
+- [VeryFastTree](https://academic.oup.com/bioinformatics/article/36/17/4658/5850991) via [veryfasttree](https://github.com/citiususc/veryfasttree-python) / [FastTree](http://www.microbesonline.org/fasttree/) (phylogenetics)
 - [NetworkX](https://networkx.org/)
 - [Matplotlib](https://matplotlib.org/)
 
