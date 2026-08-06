@@ -10,11 +10,12 @@ one request per sequence.
 
 from __future__ import annotations
 
+import http.client
 import io
 import logging
 import time
 from collections.abc import Iterable, Sequence
-from urllib.error import HTTPError
+from urllib.error import URLError
 
 import pandas as pd
 import requests
@@ -39,19 +40,36 @@ _ENTREZ_BATCH_SIZE = 200
 _ENTREZ_MAX_RETRIES = 10
 _ENTREZ_RETRY_DELAY = 3.0
 
+# urllib.error.HTTPError is a URLError subclass, so this also covers plain
+# HTTP error statuses. http.client.HTTPException covers things like
+# IncompleteRead (the connection dropping mid-response, which NCBI's Entrez
+# endpoints hit occasionally on large batched fetches) and BadStatusLine;
+# ConnectionError/TimeoutError cover socket-level drops and timeouts.
+_RETRYABLE_NETWORK_ERRORS = (URLError, http.client.HTTPException, ConnectionError, TimeoutError)
+
 
 def _batched(items: Sequence[str], size: int) -> Iterable[Sequence[str]]:
     for i in range(0, len(items), size):
         yield items[i : i + size]
 
 
-def fetch_family_page(family: str) -> str:
+def fetch_family_page(family: str, max_retries: int = 5, retry_delay: float = 5.0) -> str:
     """Download the raw CAZy family data page (tab-separated GenBank ID listing)."""
     url = CAZY_FAMILY_URL.format(family=family)
     logger.info("Retrieving data from %s", url)
-    response = requests.get(url, timeout=60)
-    response.raise_for_status()
-    return response.text
+
+    attempts = 0
+    while True:
+        try:
+            response = requests.get(url, timeout=60)
+            response.raise_for_status()
+            return response.text
+        except requests.RequestException as exc:
+            attempts += 1
+            if attempts >= max_retries:
+                raise
+            logger.info("Network error retrieving CAZy data (%s); retrying in %.0fs.", exc, retry_delay)
+            time.sleep(retry_delay)
 
 
 def parse_family_table(raw_text: str) -> tuple[pd.DataFrame, dict[str, str]]:
@@ -90,11 +108,14 @@ def fetch_sequences_fasta(ids: Sequence[str], email: str, batch_size: int = _ENT
                 with Entrez.efetch(db="protein", id=",".join(batch), rettype="fasta", retmode="text") as handle:
                     chunks.append(handle.read())
                 break
-            except HTTPError:
+            except _RETRYABLE_NETWORK_ERRORS as exc:
                 attempts += 1
                 if attempts >= _ENTREZ_MAX_RETRIES:
-                    logger.warning("Giving up on a batch of %d IDs after repeated HTTP errors.", len(batch))
+                    logger.warning(
+                        "Giving up on a batch of %d IDs after repeated network errors (%s).", len(batch), exc
+                    )
                     break
+                logger.info("Network error fetching a sequence batch (%s); retrying in %.0fs.", exc, _ENTREZ_RETRY_DELAY)
                 time.sleep(_ENTREZ_RETRY_DELAY)
         logger.info("Fetched %d/%d sequence batches.", len(chunks), total_batches)
 
@@ -134,11 +155,11 @@ def fetch_characterized_page(family: str, max_retries: int = 10, retry_delay: fl
     while True:
         try:
             return pd.read_html(url)
-        except HTTPError:
+        except _RETRYABLE_NETWORK_ERRORS as exc:
             attempts += 1
             if attempts >= max_retries:
                 raise
-            logger.info("Too many requests to CAZy; retrying in %.0fs.", retry_delay)
+            logger.info("Network error retrieving CAZy data (%s); retrying in %.0fs.", exc, retry_delay)
             time.sleep(retry_delay)
 
 
@@ -191,11 +212,24 @@ def fetch_characterized_sequences(
 
     output = ""
     for genbank_id in filtered_ids:
-        try:
-            with Entrez.efetch(db="protein", id=genbank_id, rettype="fasta", retmode="text") as handle:
-                text = handle.read()
-        except HTTPError:
-            logger.warning("HTTP error fetching characterized sequence %s.", genbank_id)
+        text = None
+        attempts = 0
+        while attempts < _ENTREZ_MAX_RETRIES:
+            try:
+                with Entrez.efetch(db="protein", id=genbank_id, rettype="fasta", retmode="text") as handle:
+                    text = handle.read()
+                break
+            except _RETRYABLE_NETWORK_ERRORS as exc:
+                attempts += 1
+                if attempts >= _ENTREZ_MAX_RETRIES:
+                    logger.warning(
+                        "Giving up on characterized sequence %s after repeated network errors (%s).",
+                        genbank_id, exc,
+                    )
+                    break
+                time.sleep(_ENTREZ_RETRY_DELAY)
+
+        if text is None:
             continue
 
         from Bio import SeqIO

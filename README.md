@@ -58,6 +58,21 @@ candy my_sequences.fasta --tree
 
 `--email` falls back to the `CANDY_EMAIL` environment variable, then an interactive prompt, so `export CANDY_EMAIL=you@example.com` once and just run `candy GH173` from then on. Run `candy --help` for the full list of options.
 
+### Domain-name curation
+
+Partway through a run, CANDy needs to decide which raw InterPro domain names (often several near-duplicates from different member databases) should be grouped under one umbrella name. By default (`--curation-backend manual`) it asks you interactively: it prints a numbered list of the domain names still to curate, then prompts twice --
+
+1. `Domain name:` -- type the umbrella name you want to use (e.g. `Catalytic domain`)
+2. `Includes:` -- type the comma-separated numbers of the domains that belong under it (e.g. `0,2`)
+
+It repeats this until every domain is grouped; type `STOP` at the `Domain name:` prompt at any point to leave all remaining domains as their own individual groups.
+
+To skip this entirely, use Gemini to curate automatically instead:
+
+1. Install the extra: `pip install -e ".[gemini]"`
+2. Get a free API key at [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
+3. Run with `--curation-backend gemini --curation-api-key YOUR_KEY`, or set it once via `$env:GOOGLE_API_KEY="YOUR_KEY"` (PowerShell) / `export GOOGLE_API_KEY=YOUR_KEY` (bash) and just pass `--curation-backend gemini`
+
 ### Python API
 
 ```python

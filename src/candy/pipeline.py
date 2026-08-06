@@ -32,6 +32,13 @@ from candy.phylogenetics import get_tree_builder
 
 logger = logging.getLogger(__name__)
 
+CITATION = (
+    "If you use CANDy and publish the results, please cite:\n"
+    "Windels A, Franceus J, Pleiss J, Desmet T. CANDy: Automated analysis of domain architectures "
+    "in carbohydrate-active enzymes. PLoS One. 2024 Jul 11;19(7):e0306410. "
+    "doi: 10.1371/journal.pone.0306410. PMID: 38990885; PMCID: PMC11238990."
+)
+
 
 @dataclass
 class PipelineResult:
@@ -83,6 +90,7 @@ def _unique_jobname(output_dir: Path, jobname: str) -> str:
 
 
 def run_pipeline(config: PipelineConfig) -> PipelineResult:
+    print(f"\n{CITATION}\n")
     config.jobname = _unique_jobname(config.output_dir, config.jobname)
     jobname_dir = config.output_dir / config.jobname
     jobname_dir.mkdir(parents=True, exist_ok=True)
