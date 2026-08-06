@@ -1,0 +1,13 @@
+name: candy
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  - mmseqs2
+  - cd-hit
+  - mafft
+  - fasttree
+  - pip:
+      - -e .

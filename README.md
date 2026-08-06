@@ -1,144 +1,64 @@
 # Carbohydrate Active eNzyme Domain analYsis tool (CANDy) - automated analysis of domain architectures in carbohydrate-active enzymes
-CANDy boosts a fast, FAIR and seamless protein domain analysis of any [CAZy](http://www.cazy.org/) family. Check the latest online version  on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing), yet for bigger families we recommend you downloading the Jupyter Notebook.
 
-#### April 2025 update : We included MMseqs2 as an alternative clustering option for CD-HIT. Additionally, the domain name curation step is now fully automated by employing Gemini 2.0 flash. Users still have the option to perform this step manually. (Only available on Colab)
+CANDy is a fast, FAIR and seamless protein domain analysis tool for any [CAZy](http://www.cazy.org/) family.
 
-## Requirements
+**This branch is a work-in-progress rewrite of CANDy as an installable Python package** (CLI + Python API), replacing the original Google Colab / Jupyter Notebook implementation. The previous notebook (`CANDy v2.0.ipynb`) is still in this repository for reference, and the original is on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing).
 
-Make sure to have following tools installed in the same directory as the Jupyter Notebook:
+## Installation
 
-### 1. CD-HIT
+CANDy depends on a handful of external bioinformatics tools (CD-HIT or MMseqs2 for clustering, MAFFT for alignment, FastTree for phylogenetics) that aren't distributed via PyPI. The supported install path is a conda environment that provides them, with CANDy itself installed via pip into that environment:
 
-Download the source code for CD-HIT from the GitHub repository at https://github.com/weizhongli/cdhit/releases and follow the [installation instructions](https://github.com/weizhongli/cdhit/wiki/2.-Installation). 
-  
-### 2. MAFFT
+```bash
+conda env create -f environment.yml
+conda activate candy
+```
 
-Precompiled binary can be downloaded here: https://mafft.cbrc.jp/alignment/software/. Change the installation directory to the path where the Notebook is stored or manually move the executable from the default directory. You can find the location of MAFFT by typing the following command in your terminal:
+This installs the external tools via bioconda and CANDy itself (editable) via pip. If you already have those tools on your PATH through some other means, you can also just `pip install -e .` directly.
 
-    where mafft
+To also enable automated Gemini-based domain-name curation:
 
-### 3. FastTree 
+```bash
+pip install -e ".[gemini]"
+```
 
-#### MacOS
+## Usage
 
-   Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
-   
-   Or
-   
-   Open a terminal window and install the Xcode Command Line Tools by typing the following command:
-   
-     xcode-select --install
-    
-   Install Homebrew by typing the following command:
-     
-     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+### Command line
 
-   Install FastTree by typing the following command:
-    
-     brew install fasttree
+```bash
+# Query a CAZy family directly
+candy run --jobname my_gh5_run --family GH5 --email you@example.com --tree
 
-#### Linux
+# Analyse your own FASTA file instead
+candy run --jobname my_custom_run --fasta my_sequences.fasta --tree
+```
 
-  Follow installation instructions for your system on http://www.microbesonline.org/fasttree/#Install
-  
-  Or
+Run `candy run --help` for the full list of options (taxonomy subset, clustering software/cutoff, BLAST identity threshold, max domain length, domain-overlap threshold, curation backend, ...).
 
-  Download the FastTree source code from the FastTree website at http://www.microbesonline.org/fasttree/.
+### Python API
 
-  Open a terminal window and navigate to the directory where you downloaded the source code.
+```python
+from candy.config import CAZyFamilyInput, PipelineConfig, Taxonomy
+from candy.pipeline import run_pipeline
 
-  Type the following commands to compile the FastTree package:
-  
-    tar xvzf FastTree-2.1.13.c
-    cd FastTree-2.1.13
-    make
-    
-  After the compilation process completes, you will find the FastTree executable file in the "FastTree-2.1.13" directory.
-  
-#### Windows
-
-   Download the FastTree Windows binary from the FastTree website at http://www.microbesonline.org/fasttree/#Download.
-
-   Extract the FastTree executable from the downloaded ZIP file.
-
-
-
-## Running CANDy
-Your directory shoud look like this:
-
-<img width="385" alt="image" src="https://github.com/PyEED/CANDy/assets/72694200/26370212-d8a8-42df-a0a8-917e2eae6d56">
-
-
-This Notebook uses several Python packages. To avoid compatibility issues we recommend running this Notebook in a __virtual environment__.
-- Therefore, install [Anaconda](https://www.anaconda.com/) and follow the installation instructions.
-- Go to 'Environments' in Anaconda and click 'create'. Give your environment a name, for example '__myenv__'. The virual environment will be launched automatically.
-- Go to the package search bar and search for '__ipywidgets__'. Download the package to be able to use the interactive widgets in this Notebook. Repeat for the '__h5py__' package.
-- Next, go back to the  'Home' page in Anaconda and install __Jupyter Notebook__. Once completed, press launch and go to the directory where you saved this Notebook. 
-- Verify that you see the name of the virtual enivronment on the right top of the Notebook, for example: __Python (myenv)__. If that's not the case, go to Kernel and choose the environment.
-
-Also, for large families, avoid your computer entering sleep or stand-by mode since this will interupt the run. Change the settings in your computer or [caffeinate](https://pypi.org/project/caffeinate/) your system.
-
-#### MacOS
-
-Install caffeinate package by running in your Terminal:
-
-    brew install caffeinate
-    
-Start the package by running:
-
-    caffeinate -d
-    
-Stop by running: 
-
-    ctrl + C
-
-#### Linux
-
-Install caffeinate package by running in your Terminal:
-
-    sudo apt-get install caffeinate
-    
-Start the package by running:
-
-    caffeinate -d
-    
-Stop by running: 
-
-    ctrl + C
-#### Windows
-
-Note: The caffeinate package is not available for Windows. However, you can use a similar feature called "powercfg" to prevent the system from going to sleep.
-
-Open the Command Prompt application.
-
-Type following line to see the current power requests:
-   
-    powercfg /requests
-
-Type following line, followed by the type of request you want to override (e.g., "system" or "display"):
- 
-    powercfg /requestsoverride
-
-To stop the power request override, type in "powercfg /requestsoverride" followed by the type of request and the "/remove" argument
+config = PipelineConfig(
+    input=CAZyFamilyInput(enzyme_class="GH", family_number=5, email="you@example.com", taxonomy=Taxonomy.ALL),
+    jobname="my_gh5_run",
+    output_dir="results",
+    build_tree=True,
+)
+result = run_pipeline(config)
+print(result.database_path, result.tree_path)
+```
 
 ## Output
 
-When running the Google Colab version of CANDy, results containing the FATSA files, SQLite database, MSA, phylogenetic tree (in Newick format) and iTOL annotation files are automatically downloaded in a Zip file. When running CANDy locally, these outputs are stores in the same directory as the Jupyter Notebook.
-### Database
+Results are written to `{output_dir}/{jobname}/`:
 
-To open the results in the database, download SQLite from: https://sqlitebrowser.org/
-
-### (Annotated) Phylogenetic tree 
-
-To view the phylogenetic tree, several free services are available. The Notebook makes use of the ete3 package to visualize the annotated tree in there. For a more interactive experience we recommend [iTOL](https://itol.embl.de/). The script outputs iTOL annotation files for the visualization of the protein domains and the activity of the included characterized sequences.
-
-![image](https://github.com/PyEED/CANDy/assets/72694200/889b74eb-f740-4aff-80a0-855359099dc0)
-
-### Protein domain co-occurence network
-
-CANDy offers users a co-occurrence network that visually represents both the frequency of different domain types and the degree to which they are interconnected. A simple visualisation is offered in the Notebook, but for a more interactive experience we recommend using [Cytoscape](https://cytoscape.org/) (yFiles Organic Layout). 
-
-![image](https://github.com/PyEED/CANDy/assets/72694200/cd20a756-7ded-4964-a9b9-04f7d83698a1)
+- FASTA files for each processing stage
+- A SQLite database (`{jobname}_db.db`) containing the domain annotations -- open it with [DB Browser for SQLite](https://sqlitebrowser.org/)
+- A protein domain co-occurrence network (`{jobname}_domain_cooccurence_network.graphml`) -- open it in [Cytoscape](https://cytoscape.org/) (yFiles Organic Layout recommended)
+- If `--tree`/`build_tree=True`: a MAFFT alignment, a FastTree phylogenetic tree (Newick), and [iTOL](https://itol.embl.de/) annotation files for the domain architecture and (for CAZy family queries) characterized-enzyme activity
 
 ## Acknowledgements
 
@@ -146,13 +66,12 @@ CANDy communicates with and/or references the following separate libraries, pack
 
 - [Biopython](https://biopython.org/)
 - [pandas](https://pandas.pydata.org/)
-- [tqdm](https://github.com/tqdm/tqdm) 
+- [tqdm](https://github.com/tqdm/tqdm)
 - [sqlitebrowser](https://sqlitebrowser.org/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
-- [sdRDM](https://github.com/JR-1991/software-driven-rdm)
 - [requests](https://requests.readthedocs.io/en/latest/)
-- [ete3](http://etetoolkit.org/)
 - [CD-HIT](https://academic.oup.com/bioinformatics/article/22/13/1658/194225?login=true)
+- [MMseqs2](https://www.nature.com/articles/nbt.3988)
 - [MAFFT](https://academic.oup.com/nar/article/30/14/3059/2904316?login=true)
 - [FastTree](http://www.microbesonline.org/fasttree/)
 - [NetworkX](https://networkx.org/)
@@ -168,9 +87,9 @@ Windels A, Franceus J, Pleiss J, Desmet T. CANDy: Automated analysis of domain a
 
 ### License and Disclaimer
 
-This Jupyter Notebook is licensed under [MIT](https://github.com/PyEED/CANDy/blob/main/SECURITY.md#mit-license).
+CANDy is licensed under [MIT](https://github.com/PyEED/CANDy/blob/main/SECURITY.md#mit-license).
 
-This Notebook and other information provided is for theoretical utilisation only, caution should be exercised in its use. It is provided ‘as-is’ without any warranty of any kind, whether expressed or implied. Information is not intended to be a substitute for professional medical advice, diagnosis, or treatment, and does not constitute medical or other professional advice.
+CANDy and other information provided is for theoretical utilisation only, caution should be exercised in its use. It is provided 'as-is' without any warranty of any kind, whether expressed or implied. Information is not intended to be a substitute for professional medical advice, diagnosis, or treatment, and does not constitute medical or other professional advice.
 
 ### Third-party software
 
@@ -180,6 +99,6 @@ Use of the third-party software, libraries or code referred to in the [Acknowled
 
 The following databases are used by CANDy, and are available with reference to the following:
 - UniProt: (unmodified), by The UniProt Consortium, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/).
-- NCBI: (unmodified), by the National Library of Medicine, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
-- CAZy: (unmodified), by http://www.cazy.org/ and Elodie Drula, Marie-Line Garron, Suzan Dogan, Vincent Lombard, Bernard Henrissat, Nicolas Terrapon, The carbohydrate-active enzyme database: functions and literature, Nucleic Acids Research, Volume 50, Issue D1, 7 January 2022, Pages D571–D577, https://doi.org/10.1093/nar/gkab1045, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
-- InterPro: (unmodified), by EMBL-EBI, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/). 
+- NCBI: (unmodified), by the National Library of Medicine, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/).
+- CAZy: (unmodified), by http://www.cazy.org/ and Elodie Drula, Marie-Line Garron, Suzan Dogan, Vincent Lombard, Bernard Henrissat, Nicolas Terrapon, The carbohydrate-active enzyme database: functions and literature, Nucleic Acids Research, Volume 50, Issue D1, 7 January 2022, Pages D571–D577, https://doi.org/10.1093/nar/gkab1045, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/).
+- InterPro: (unmodified), by EMBL-EBI, available under a [Creative Commons Attribution-NoDerivatives 4.0 International License](http://creativecommons.org/licenses/by-nd/4.0/).

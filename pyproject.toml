@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "candy-cazyme"
+version = "3.0.0.dev0"
+description = "Automated analysis of domain architectures in carbohydrate-active enzymes (CAZymes)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Alex Windels" },
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "biopython>=1.81",
+    "pandas>=2.0",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "SQLAlchemy>=2.0",
+    "networkx>=3.1",
+    "matplotlib>=3.7",
+    "numpy>=1.26",
+    "typer>=0.12",
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+gemini = ["google-genai>=0.3"]
+dev = [
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+]
+
+[project.scripts]
+candy = "candy.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: requires network access or external CLI tools (mafft, fasttree, mmseqs2, cd-hit)",
+]
