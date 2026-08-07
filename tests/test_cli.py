@@ -1,8 +1,28 @@
+import re
+
 from typer.testing import CliRunner
 
 from candy.cli import _sanitize_jobname, _try_parse_family, app
 
 runner = CliRunner()
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _plain_text(output: str) -> str:
+    """Strip ANSI color codes and box-drawing characters from Typer's Rich-rendered output.
+
+    Whether Rich colorizes its error panels depends on how it detects the
+    terminal (observed to differ between a local shell and a CI runner, even
+    on identical typer/rich versions) -- when it does, the color codes can
+    land mid-word at a wrapped line boundary, splitting a phrase that should
+    otherwise be a contiguous substring. Stripping them makes assertions
+    robust to that regardless of environment.
+    """
+    text = _ANSI_RE.sub("", output)
+    for border_char in "─│┌┐└┘":
+        text = text.replace(border_char, " ")
+    return " ".join(text.split())
 
 
 def test_try_parse_family_no_subfamily():
@@ -30,10 +50,7 @@ def test_cli_help():
 def test_cli_bare_invocation_is_candy_target_no_subcommand_needed():
     # `candy GH5` should work directly -- no `run` subcommand required.
     result = runner.invoke(app, ["not-a-real-family-and-not-a-file"])
-    result_output = result.output
-    for border_char in "─│┌┐└┘":
-        result_output = result_output.replace(border_char, " ")
-    normalized = " ".join(result_output.split())
+    normalized = _plain_text(result.output)
     assert result.exit_code != 0
     assert "neither an existing FASTA file" in normalized
     assert "valid CAZy family code" in normalized
@@ -204,7 +221,7 @@ def test_cli_db_preference_unknown_name_is_a_clean_error(tmp_path, monkeypatch):
     )
 
     assert result.exit_code != 0
-    assert "Unknown database name" in result.output
+    assert "Unknown database name" in _plain_text(result.output)
 
 
 def test_cli_pipeline_value_error_is_reported_cleanly_without_a_traceback(monkeypatch):
