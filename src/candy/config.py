@@ -149,6 +149,7 @@ class CurationConfig:
 
     backend: str = "manual"  # "manual" | "gemini" | any registered CurationBackend name
     api_key: str | None = None
+    model: str | None = None  # backend-specific model name; None uses the backend's default
 
 
 @dataclass

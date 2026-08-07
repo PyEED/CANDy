@@ -28,7 +28,7 @@ class GeminiCurationBackend:
 
     name = "gemini"
 
-    def __init__(self, api_key: str | None = None, model: str = "gemini-2.0-flash") -> None:
+    def __init__(self, api_key: str | None = None, model: str = "gemini-flash-latest") -> None:
         self.api_key = api_key or os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
             raise ValueError(

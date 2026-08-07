@@ -126,7 +126,12 @@ def run_pipeline(config: PipelineConfig) -> PipelineResult:
 
     # --- Stage 8: curate synonymous domain names ---
     raw_domain_names = sorted({name for hits in domain_architecture.values() for _, name in hits})
-    curation_kwargs = {} if config.curation.backend == "manual" else {"api_key": config.curation.api_key}
+    if config.curation.backend == "manual":
+        curation_kwargs = {}
+    else:
+        curation_kwargs = {"api_key": config.curation.api_key}
+        if config.curation.model:
+            curation_kwargs["model"] = config.curation.model
     curation_backend = get_curation_backend(config.curation.backend, **curation_kwargs)
     family_label = config.input.family if is_cazy_query else None
     curated_domains = curation_backend.curate(raw_domain_names, family=family_label)

@@ -87,6 +87,12 @@ def main(
     curation_api_key: Optional[str] = typer.Option(
         None, envvar="GOOGLE_API_KEY", help="API key for the curation backend, if it needs one."
     ),
+    curation_model: Optional[str] = typer.Option(
+        None,
+        help="Model name for the curation backend, if it needs one (e.g. a Gemini model name). "
+        "Defaults to the backend's own default. Useful to override without a code change if a "
+        "provider deprecates/renames their default model.",
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable debug logging."),
 ) -> None:
     """Run the CANDy pipeline end-to-end.
@@ -149,7 +155,7 @@ def main(
             overlap_percentage=overlap_percentage,
             database_preference=database_preference,
         ),
-        curation=CurationConfig(backend=curation_backend, api_key=curation_api_key),
+        curation=CurationConfig(backend=curation_backend, api_key=curation_api_key, model=curation_model),
         blast_identity_threshold=blast_identity,
         build_tree=build_tree,
     )
