@@ -23,7 +23,8 @@ FAMSA and VeryFastTree ship native SIMD code. If your Python is x86_64 running u
 **Option A -- [`uv`](https://docs.astral.sh/uv/) (recommended, one-time setup):** `uv` manages isolated Python installs and always defaults to the native architecture.
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh   # only if you don't already have uv
+# only run the first line if you don't already have uv
+curl -LsSf https://astral.sh/uv/install.sh | sh   
 uv tool install candy-cazyme
 ```
 
@@ -101,11 +102,10 @@ It repeats this until every domain is grouped; type `STOP` at the `Domain name:`
 
 To skip this entirely, use Gemini to curate automatically instead:
 
-1. Install the extra: `pip install "candy-cazyme[gemini]"` (the quotes matter in zsh, macOS's default shell -- without them, `[gemini]` is parsed as a glob pattern)
+1. Install the extra: `pip install "candy-cazyme[gemini]"` (for Mac: uv tool install  "candy-cazyme[gemini]" --force --python 3.10)
 2. Get a free API key at [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
 3. Run with `--curation-backend gemini --curation-api-key YOUR_KEY`, or set it once via `$env:GOOGLE_API_KEY="YOUR_KEY"` (PowerShell) / `export GOOGLE_API_KEY=YOUR_KEY` (bash) and just pass `--curation-backend gemini`
 
-**If this step appears to hang with nothing printing** (v3.0.2+): CANDy now logs before and after the Gemini request, and bounds each attempt to a 60-second timeout, so a multi-minute wait during retries is visible and finite rather than silent. On an older version, this step had no request timeout at all and could hang indefinitely on a stalled connection with zero output -- if you hit this, `Ctrl+C`, upgrade (`pip install --upgrade candy-cazyme`), and rerun.
 
 ### Python API
 
