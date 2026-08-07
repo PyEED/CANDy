@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "candy-cazyme"
-version = "3.0.0"
+version = "3.0.1"
 description = "Automated analysis of domain architectures in carbohydrate-active enzymes (CAZymes)"
 readme = "README.md"
 license = { text = "MIT" }
