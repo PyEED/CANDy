@@ -46,9 +46,10 @@ _ROSETTA_WARNING = (
     "hardware). CANDy's bundled FAMSA and VeryFastTree backends ship native SIMD "
     "code, and Rosetta's emulation of some CPU instructions is a known cause of a "
     "silent 'illegal hardware instruction' crash partway through --tree (no Python "
-    "traceback, since the process dies below the interpreter). If that happens, "
-    "install a native arm64 Python (e.g. via Homebrew at /opt/homebrew, not "
-    "/usr/local) and reinstall CANDy there."
+    "traceback, since the process dies below the interpreter) as well as unreliable "
+    "network calls (e.g. Gemini curation). Fix: install a native arm64 Python -- see "
+    "the 'Apple Silicon setup' section in the README for exact steps "
+    "(https://github.com/PyEED/CANDy#apple-silicon-m1m2m3m4-setup)."
 )
 
 
