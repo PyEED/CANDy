@@ -160,7 +160,11 @@ def main(
         build_tree=build_tree,
     )
 
-    result = run_pipeline(config)
+    try:
+        result = run_pipeline(config)
+    except ValueError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
 
     typer.echo(f"\nDone. Results written to {result.jobname_dir}")
     typer.echo(f"  Database:              {result.database_path}")

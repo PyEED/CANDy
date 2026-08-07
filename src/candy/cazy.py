@@ -65,6 +65,14 @@ def fetch_family_page(family: str, max_retries: int = 5, retry_delay: float = 5.
             response.raise_for_status()
             return response.text
         except requests.RequestException as exc:
+            if isinstance(exc, requests.HTTPError) and exc.response is not None and exc.response.status_code == 404:
+                # A 404 means the family doesn't exist on CAZy -- permanent, not
+                # worth retrying, and deserves a clear message instead of a
+                # raw traceback surfacing from deep inside the retry loop.
+                raise ValueError(
+                    f"CAZy family '{family}' not found ({url} returned 404). "
+                    "Check the family code, e.g. 'GH173' or 'GH5_1'."
+                ) from exc
             attempts += 1
             if attempts >= max_retries:
                 raise

@@ -207,6 +207,22 @@ def test_cli_db_preference_unknown_name_is_a_clean_error(tmp_path, monkeypatch):
     assert "Unknown database name" in result.output
 
 
+def test_cli_pipeline_value_error_is_reported_cleanly_without_a_traceback(monkeypatch):
+    # Regression test: a ValueError from run_pipeline (e.g. an unknown CAZy
+    # family) used to propagate as a raw traceback. It should now print a
+    # one-line "Error: ..." message and exit non-zero, no traceback.
+    def fake_run_pipeline(config):
+        raise ValueError("CAZy family 'GH999' not found (... returned 404). Check the family code.")
+
+    monkeypatch.setattr("candy.cli.run_pipeline", fake_run_pipeline)
+
+    result = runner.invoke(app, ["GH999", "--email", "you@example.com"])
+
+    assert result.exit_code == 1
+    assert "Error: CAZy family 'GH999' not found" in result.output
+    assert result.exception is None or isinstance(result.exception, SystemExit)
+
+
 def test_cli_no_db_preference_uses_default_order(tmp_path, monkeypatch):
     from candy.config import DEFAULT_DATABASE_PREFERENCE
 

@@ -2,11 +2,14 @@ import http.client
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
+import requests
 
 from candy.cazy import (
     extract_characterized_ids,
     extract_ncbi_ids,
     fetch_characterized_sequences,
+    fetch_family_page,
     fetch_sequences_fasta,
     parse_family_table,
 )
@@ -49,6 +52,31 @@ def test_extract_characterized_ids_groups_by_taxonomy_header():
     assert ids == ["P12345.1", "Q99999.2"]
     assert taxonomy_dict == {"P12345.1": "B", "Q99999.2": "A"}
     assert activity_dict == {"P12345.1": "1.2.4.-", "Q99999.2": "3.2.1.-"}
+
+
+def test_fetch_family_page_raises_clear_error_on_404_without_retrying():
+    # Regression test: a nonexistent family code (e.g. a typo) used to be
+    # retried 5 times against the same permanent 404 before surfacing a raw
+    # requests.HTTPError traceback. It should now fail fast with a clear
+    # message instead.
+    calls = {"n": 0}
+
+    class FakeResponse:
+        status_code = 404
+
+        def raise_for_status(self):
+            raise requests.HTTPError("404 Client Error: Not Found", response=self)
+
+    def fake_get(url, timeout):
+        calls["n"] += 1
+        return FakeResponse()
+
+    with patch("candy.cazy.requests.get", side_effect=fake_get), patch("candy.cazy.time.sleep") as mock_sleep:
+        with pytest.raises(ValueError, match="GH999"):
+            fetch_family_page("GH999")
+
+    assert calls["n"] == 1
+    mock_sleep.assert_not_called()
 
 
 class FakeHandle:
