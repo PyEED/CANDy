@@ -106,6 +106,9 @@ To skip this entirely, use Gemini to curate automatically instead:
 2. Get a free API key at [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
 3. Run with `--curation-backend gemini --curation-api-key YOUR_KEY`, or set it once via `$env:GOOGLE_API_KEY="YOUR_KEY"` (PowerShell) / `export GOOGLE_API_KEY=YOUR_KEY` (bash) and just pass `--curation-backend gemini`
 
+**If this step appears to hang with nothing printing** (v3.0.2+): CANDy now logs before and after the Gemini request, and bounds each attempt to a 60-second timeout, so a multi-minute wait during retries is visible and finite rather than silent. On an older version, this step had no request timeout at all and could hang indefinitely on a stalled connection with zero output -- if you hit this, `Ctrl+C`, upgrade (`pip install --upgrade candy-cazyme`), and rerun.
+
+**If Gemini itself fails** (v3.0.3+, e.g. a `503 UNAVAILABLE` "high demand" error, a rate limit, or a model being deprecated): CANDy automatically retries once against a different model (`gemini-2.5-flash-lite` by default) before giving up on Gemini entirely. If that also fails, it automatically falls back to the interactive manual-curation prompt described above, rather than crashing and discarding the (often several-minutes-long) fetching/clustering/domain-detection work already done in that run.
 
 ### Python API
 

@@ -28,6 +28,13 @@ _PROMPT_TEMPLATE = (
 )
 
 
+# Tried automatically if the primary model fails (server overload, model-specific
+# outage, deprecation, ...) -- a different, typically lower-demand model often
+# succeeds even when the primary one is returning 503s. Set fallback_model=None
+# to disable and fail on the first error instead.
+_DEFAULT_FALLBACK_MODEL = "gemini-2.5-flash-lite"
+
+
 class GeminiCurationBackend:
     """Automated curation via Google Gemini, ported from the notebook's default path.
 
@@ -38,7 +45,12 @@ class GeminiCurationBackend:
 
     name = "gemini"
 
-    def __init__(self, api_key: str | None = None, model: str = "gemini-flash-latest") -> None:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str = "gemini-flash-latest",
+        fallback_model: str | None = _DEFAULT_FALLBACK_MODEL,
+    ) -> None:
         self.api_key = api_key or os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
             raise ValueError(
@@ -46,6 +58,7 @@ class GeminiCurationBackend:
                 "GOOGLE_API_KEY or GEMINI_API_KEY environment variable."
             )
         self.model = model
+        self.fallback_model = fallback_model
 
     def curate(self, domain_names: list[str], *, family: str | None = None) -> dict[str, list[str]]:
         try:
@@ -61,16 +74,31 @@ class GeminiCurationBackend:
             f"belong to enzymes from CAZy family {family}" if family else "are carbohydrate-active enzymes"
         )
         prompt = _PROMPT_TEMPLATE.format(domain_names=domain_names, family_clause=family_clause)
-
-        logger.info(
-            "Requesting domain-name curation from Gemini (model=%s, %d domain names). This can take "
-            "a while if the API is transiently retrying -- it isn't stuck if it takes a few minutes.",
-            self.model,
-            len(domain_names),
-        )
         client = genai.Client(api_key=self.api_key, http_options=types.HttpOptions(timeout=_REQUEST_TIMEOUT_MS))
-        response = client.models.generate_content(model=self.model, contents=prompt)
-        logger.info("Received curation response from Gemini.")
 
-        cleaned = response.text.replace("python", "").replace("```", "")
-        return ast.literal_eval(cleaned)
+        models_to_try = [self.model]
+        if self.fallback_model and self.fallback_model != self.model:
+            models_to_try.append(self.fallback_model)
+
+        last_error: Exception | None = None
+        for attempt_model in models_to_try:
+            logger.info(
+                "Requesting domain-name curation from Gemini (model=%s, %d domain names). This can "
+                "take a while if the API is transiently retrying -- it isn't stuck if it takes a few "
+                "minutes.",
+                attempt_model,
+                len(domain_names),
+            )
+            try:
+                response = client.models.generate_content(model=attempt_model, contents=prompt)
+                cleaned = response.text.replace("python", "").replace("```", "")
+                curated = ast.literal_eval(cleaned)
+            except Exception as exc:  # noqa: BLE001 -- deliberately broad: any failure means "try the next model"
+                logger.warning("Gemini curation failed with model=%s (%s).", attempt_model, exc)
+                last_error = exc
+                continue
+            logger.info("Received curation response from Gemini (model=%s).", attempt_model)
+            return curated
+
+        assert last_error is not None  # models_to_try is never empty
+        raise last_error

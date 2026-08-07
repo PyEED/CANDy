@@ -175,7 +175,18 @@ def run_pipeline(config: PipelineConfig) -> PipelineResult:
             curation_kwargs["model"] = config.curation.model
     curation_backend = get_curation_backend(config.curation.backend, **curation_kwargs)
     family_label = config.input.family if is_cazy_query else None
-    curated_domains = curation_backend.curate(raw_domain_names, family=family_label)
+    try:
+        curated_domains = curation_backend.curate(raw_domain_names, family=family_label)
+    except Exception as exc:  # noqa: BLE001 -- any curation-backend failure falls back to manual
+        if config.curation.backend == "manual":
+            raise
+        logger.warning(
+            "Automated curation backend '%s' failed (%s); falling back to manual curation so the "
+            "work already done in this run (fetching, clustering, domain detection) isn't lost.",
+            config.curation.backend,
+            exc,
+        )
+        curated_domains = get_curation_backend("manual").curate(raw_domain_names, family=family_label)
 
     # --- Stage 9: build the result database ---
     with open(sequences_fasta) as handle:
