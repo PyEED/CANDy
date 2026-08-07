@@ -16,7 +16,46 @@ That's it for most users -- CANDy's default toolchain is fully bundled:
 - **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.
 - **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed.
 
-  **Apple Silicon (M1/M2/M3/M4) users:** make sure you're using a native `arm64` Python (e.g. Homebrew installed at `/opt/homebrew`, not an older Intel-only install at `/usr/local`). FAMSA and VeryFastTree ship native SIMD code, and running an x86_64 Python under Rosetta 2 translation is a known cause of a silent `illegal hardware instruction` crash during `--tree`. CANDy detects this at startup and logs a warning, but installing natively avoids it entirely.
+### Apple Silicon (M1/M2/M3/M4) setup
+
+FAMSA and VeryFastTree ship native SIMD code. If your Python is x86_64 running under Rosetta 2 translation instead of native `arm64`, that's a known cause of a silent `illegal hardware instruction` crash during `--tree`, and can also make other native calls (e.g. the Gemini curation backend) unreliable. CANDy detects this at startup and logs a warning, but it's worth fixing properly rather than working around it -- **pip can't do this for you**: by the time `pip install` runs, the interpreter architecture is already fixed, so no package (including this one) can retroactively fix it. Two ways to get a correct native setup:
+
+**Option A -- [`uv`](https://docs.astral.sh/uv/) (recommended, one-time setup):** `uv` manages isolated Python installs and always defaults to the native architecture.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh   # only if you don't already have uv
+uv tool install candy-cazyme
+```
+
+`uv tool install` gives you a `candy` command backed by its own isolated, native-arm64 Python -- no venv/PATH management needed. (Skip straight to Option B if `arch` below still reports `i386` after this -- see the Terminal note.)
+
+**Option B -- Homebrew, manually:**
+
+```bash
+# 1. Confirm your shell itself is running natively (should print "arm64"):
+arch
+
+# 2. If it printed "i386", your terminal app is running under Rosetta --
+#    quit it, then in Finder: select the app (Terminal/iTerm) > Cmd+I >
+#    uncheck "Open using Rosetta" > relaunch it, and re-run `arch`.
+
+# 3. Install (or confirm) Homebrew at the Apple Silicon prefix, /opt/homebrew
+#    (a pre-existing Homebrew at /usr/local is the Intel-only one):
+/opt/homebrew/bin/brew --version || arch -arm64 /bin/bash -c \
+  "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 4. Install Python from that prefix and use it explicitly:
+/opt/homebrew/bin/brew install python@3.12
+/opt/homebrew/bin/python3.12 -m venv .venv
+source .venv/bin/activate
+pip install candy-cazyme
+```
+
+Either way, verify before running a real job:
+
+```bash
+python3 -c "import platform; print(platform.machine())"   # should print "arm64", not "x86_64"
+```
 
 If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), a conda environment with those is still provided:
 
