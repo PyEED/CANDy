@@ -1,0 +1,17 @@
+# Optional. CANDy's default toolchain (MMseqs2 for clustering, FAMSA for MSA,
+# VeryFastTree for phylogenetics) ships via `pip install candy-cazyme` alone --
+# MSA/phylogenetics are bundled Python packages, and MMseqs2 is auto-downloaded
+# on first use. This environment is only needed if you specifically want
+# CD-HIT as the clustering backend instead of MMseqs2: CD-HIT has no official
+# Windows build and no pip-installable bindings, so (unlike MMseqs2) it can't
+# be auto-downloaded and must come from conda/bioconda.
+name: candy
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  - cd-hit
+  - pip:
+      - -e .
