@@ -2,20 +2,15 @@
 
 CANDy is a fast, FAIR and seamless protein domain analysis tool for any [CAZy](http://www.cazy.org/) family.
 
-**This branch is a work-in-progress rewrite of CANDy as an installable Python package** (CLI + Python API), replacing the original Google Colab / Jupyter Notebook implementation. The previous notebook (`CANDy v2.0.ipynb`) is still in this repository for reference, and the original is on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing).
+CANDy is available as an installable Python package (CLI + Python API), replacing the original Google Colab / Jupyter Notebook implementation. The previous notebook (`archive/CANDy v2.0.ipynb`) is kept in this repository for reference, and the original is on [Google Colab](https://colab.research.google.com/drive/1ipRAwMFMDRGUinPDk2bwu1cg8fE2WY8Q?usp=sharing).
 
 ## Installation
 
-Not yet published to PyPI -- install directly from this repository for now:
-
 ```bash
-git clone https://github.com/PyEED/CANDy.git
-cd CANDy
-git checkout package-upgrade
-pip install -e .
+pip install candy-cazyme
 ```
 
-(Once published, this will just be `pip install candy-cazyme`.) That's it for most users -- CANDy's default toolchain is fully bundled:
+That's it for most users -- CANDy's default toolchain is fully bundled:
 
 - **Clustering**: [MMseqs2](https://github.com/soedinglab/MMseqs2) -- auto-downloaded and cached on first use (no conda needed). On Linux/macOS this just works. On **Windows**, MMseqs2's clustering workflows internally need a POSIX shell; the official Windows build handles this itself by installing a small helper (`busybox`) the first time it runs, which may ask for administrator permission **once** -- never again after that. (This mirrors upstream: MMseqs2's own docs list WSL as the recommended Windows path and this static build as the fallback for anyone who can't use WSL.)
 - **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.

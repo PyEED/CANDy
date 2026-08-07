@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "candy-cazyme"
-version = "3.0.0.dev0"
+version = "3.0.0"
 description = "Automated analysis of domain architectures in carbohydrate-active enzymes (CAZymes)"
 readme = "README.md"
 license = { text = "MIT" }
@@ -40,6 +40,11 @@ dev = [
     "pytest>=8.0",
     "pytest-mock>=3.14",
 ]
+
+[project.urls]
+Homepage = "https://github.com/PyEED/CANDy"
+Repository = "https://github.com/PyEED/CANDy"
+Issues = "https://github.com/PyEED/CANDy/issues"
 
 [project.scripts]
 candy = "candy.cli:app"
