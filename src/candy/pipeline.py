@@ -17,6 +17,8 @@ domain detection, rather than threading a boolean through one path.
 from __future__ import annotations
 
 import logging
+import platform
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,6 +40,42 @@ CITATION = (
     "in carbohydrate-active enzymes. PLoS One. 2024 Jul 11;19(7):e0306410. "
     "doi: 10.1371/journal.pone.0306410. PMID: 38990885; PMCID: PMC11238990."
 )
+
+_ROSETTA_WARNING = (
+    "This Python is running under Rosetta 2 translation (x86_64 on Apple Silicon "
+    "hardware). CANDy's bundled FAMSA and VeryFastTree backends ship native SIMD "
+    "code, and Rosetta's emulation of some CPU instructions is a known cause of a "
+    "silent 'illegal hardware instruction' crash partway through --tree (no Python "
+    "traceback, since the process dies below the interpreter). If that happens, "
+    "install a native arm64 Python (e.g. via Homebrew at /opt/homebrew, not "
+    "/usr/local) and reinstall CANDy there."
+)
+
+
+def _warn_if_running_under_rosetta() -> None:
+    """Detect x86_64 Python running via Rosetta 2 translation on Apple Silicon.
+
+    Surfaced by a real run: FAMSA's alignment step crashed with a SIGILL and
+    no Python traceback at all (just the shell's own "illegal hardware
+    instruction" message), on a Mac whose Python was an Intel-prefix
+    (/usr/local) Homebrew build -- the classic setup for an x86_64 Python
+    still installed from before an Apple Silicon upgrade, now running under
+    Rosetta. Warning about this *before* the (potentially long) clustering
+    and curation stages run is much more useful than the crash itself.
+    """
+    if platform.system() != "Darwin" or platform.machine() != "x86_64":
+        return
+    try:
+        translated = subprocess.run(
+            ["sysctl", "-n", "sysctl.proc_translated"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return
+    if translated.stdout.strip() == "1":
+        logger.warning(_ROSETTA_WARNING)
 
 
 @dataclass
@@ -91,6 +129,8 @@ def _unique_jobname(output_dir: Path, jobname: str) -> str:
 
 def run_pipeline(config: PipelineConfig) -> PipelineResult:
     print(f"\n{CITATION}\n")
+    if config.build_tree:
+        _warn_if_running_under_rosetta()
     config.jobname = _unique_jobname(config.output_dir, config.jobname)
     jobname_dir = config.output_dir / config.jobname
     jobname_dir.mkdir(parents=True, exist_ok=True)

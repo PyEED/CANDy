@@ -16,6 +16,8 @@ That's it for most users -- CANDy's default toolchain is fully bundled:
 - **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.
 - **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed.
 
+  **Apple Silicon (M1/M2/M3/M4) users:** make sure you're using a native `arm64` Python (e.g. Homebrew installed at `/opt/homebrew`, not an older Intel-only install at `/usr/local`). FAMSA and VeryFastTree ship native SIMD code, and running an x86_64 Python under Rosetta 2 translation is a known cause of a silent `illegal hardware instruction` crash during `--tree`. CANDy detects this at startup and logs a warning, but installing natively avoids it entirely.
+
 If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), a conda environment with those is still provided:
 
 ```bash
@@ -24,11 +26,7 @@ conda activate candy
 ```
 and pass `--clustering-software cd-hit` / build a `PipelineConfig` with `alignment_tool="mafft"`, `tree_tool="fasttree"`.
 
-To also enable automated Gemini-based domain-name curation:
-
-```bash
-pip install -e ".[gemini]"
-```
+To also enable automated Gemini-based domain-name curation, see [Domain-name curation](#domain-name-curation) below.
 
 If you'd rather not have CANDy download anything automatically (e.g. air-gapped environments), set `CANDY_NO_AUTO_DOWNLOAD=1` -- clustering will then require `mmseqs`/`cd-hit` already on PATH.
 
@@ -64,7 +62,7 @@ It repeats this until every domain is grouped; type `STOP` at the `Domain name:`
 
 To skip this entirely, use Gemini to curate automatically instead:
 
-1. Install the extra: `pip install -e ".[gemini]"`
+1. Install the extra: `pip install "candy-cazyme[gemini]"` (the quotes matter in zsh, macOS's default shell -- without them, `[gemini]` is parsed as a glob pattern)
 2. Get a free API key at [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
 3. Run with `--curation-backend gemini --curation-api-key YOUR_KEY`, or set it once via `$env:GOOGLE_API_KEY="YOUR_KEY"` (PowerShell) / `export GOOGLE_API_KEY=YOUR_KEY` (bash) and just pass `--curation-backend gemini`
 
