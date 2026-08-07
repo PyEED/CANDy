@@ -78,3 +78,56 @@ def test_gemini_curate_bounds_request_with_an_explicit_timeout_and_logs_progress
     messages = [record.message for record in caplog.records]
     assert any("Requesting domain-name curation from Gemini" in m for m in messages)
     assert any("Received curation response from Gemini" in m for m in messages)
+
+
+def test_gemini_curate_falls_back_to_secondary_model_on_failure(caplog):
+    # Regression test: a real run hit a 503 UNAVAILABLE ("high demand") from
+    # the primary model. A different model is often not overloaded at the
+    # same time, so try it automatically before giving up.
+    pytest.importorskip("google.genai")
+    from candy.curation.gemini import GeminiCurationBackend
+
+    fake_response = MagicMock()
+    fake_response.text = "{'Catalytic domain': ['A']}"
+    fake_client = MagicMock()
+    fake_client.models.generate_content.side_effect = [Exception("503 UNAVAILABLE"), fake_response]
+
+    with patch("google.genai.Client", return_value=fake_client), caplog.at_level("INFO"):
+        backend = GeminiCurationBackend(api_key="fake-key", model="primary-model", fallback_model="backup-model")
+        result = backend.curate(["A"])
+
+    assert result == {"Catalytic domain": ["A"]}
+    calls = fake_client.models.generate_content.call_args_list
+    assert calls[0].kwargs["model"] == "primary-model"
+    assert calls[1].kwargs["model"] == "backup-model"
+    assert any("Gemini curation failed with model=primary-model" in r.message for r in caplog.records)
+
+
+def test_gemini_curate_raises_last_error_when_all_models_fail():
+    pytest.importorskip("google.genai")
+    from candy.curation.gemini import GeminiCurationBackend
+
+    fake_client = MagicMock()
+    fake_client.models.generate_content.side_effect = [Exception("503 primary"), Exception("503 fallback")]
+
+    with patch("google.genai.Client", return_value=fake_client):
+        backend = GeminiCurationBackend(api_key="fake-key", model="primary-model", fallback_model="backup-model")
+        with pytest.raises(Exception, match="503 fallback"):
+            backend.curate(["A"])
+
+    assert fake_client.models.generate_content.call_count == 2
+
+
+def test_gemini_curate_fallback_disabled_when_fallback_model_is_none():
+    pytest.importorskip("google.genai")
+    from candy.curation.gemini import GeminiCurationBackend
+
+    fake_client = MagicMock()
+    fake_client.models.generate_content.side_effect = Exception("503 primary")
+
+    with patch("google.genai.Client", return_value=fake_client):
+        backend = GeminiCurationBackend(api_key="fake-key", model="primary-model", fallback_model=None)
+        with pytest.raises(Exception, match="503 primary"):
+            backend.curate(["A"])
+
+    assert fake_client.models.generate_content.call_count == 1

@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from candy.config import CAZyFamilyInput, ClusteringConfig, CustomFastaInput, PipelineConfig, Taxonomy
+from candy.config import CAZyFamilyInput, ClusteringConfig, CurationConfig, CustomFastaInput, PipelineConfig, Taxonomy
 from candy.pipeline import _warn_if_running_under_rosetta, run_pipeline
 
 
@@ -118,6 +118,66 @@ def test_run_pipeline_custom_fasta_mode_without_tree(tmp_path):
     assert result.domain_annotation_path is None  # build_tree=False
     assert result.tree_path is None
     assert result.sequence_count == 1
+
+
+class FailingCurationBackend:
+    name = "gemini"
+
+    def curate(self, domain_names, *, family=None):
+        raise RuntimeError("503 UNAVAILABLE: This model is currently experiencing high demand.")
+
+
+def test_run_pipeline_falls_back_to_manual_curation_when_automated_backend_fails(tmp_path, caplog):
+    # Regression test: a Gemini 503 used to crash the whole run, discarding
+    # all the upstream work (fetching, clustering, domain detection) over a
+    # transient failure. It should fall back to manual curation instead.
+    fasta_path = tmp_path / "input.fasta"
+    fasta_path.write_text(">Protein1\nMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLA\n")
+
+    config = PipelineConfig(
+        input=CustomFastaInput(fasta_path=fasta_path),
+        jobname="testjob_curation_fallback",
+        output_dir=tmp_path / "out",
+        build_tree=False,
+        curation=CurationConfig(backend="gemini", api_key="fake-key"),
+    )
+
+    def fake_get_curation_backend(name, **kwargs):
+        return StubCurationBackend() if name == "manual" else FailingCurationBackend()
+
+    with patch("candy.interpro._query_md5_batch", side_effect=lambda batch: _fake_match_xml(batch)), patch(
+        "candy.interpro._fetch_entry_name", return_value="Catalytic domain"
+    ), patch("candy.pipeline.get_curation_backend", side_effect=fake_get_curation_backend), caplog.at_level(
+        "WARNING"
+    ):
+        result = run_pipeline(config)
+
+    assert result.database_path.exists()
+    assert any("falling back to manual curation" in r.message for r in caplog.records)
+
+
+def test_run_pipeline_manual_curation_failure_is_not_caught(tmp_path):
+    # The manual backend has nowhere further to fall back to -- its own
+    # failures (e.g. EOFError on a non-interactive stdin) should propagate.
+    fasta_path = tmp_path / "input.fasta"
+    fasta_path.write_text(">Protein1\nMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLAMKVLA\n")
+
+    config = PipelineConfig(
+        input=CustomFastaInput(fasta_path=fasta_path),
+        jobname="testjob_manual_failure",
+        output_dir=tmp_path / "out",
+        build_tree=False,
+        curation=CurationConfig(backend="manual"),
+    )
+
+    with patch("candy.interpro._query_md5_batch", side_effect=lambda batch: _fake_match_xml(batch)), patch(
+        "candy.interpro._fetch_entry_name", return_value="Catalytic domain"
+    ), patch("candy.pipeline.get_curation_backend", return_value=FailingCurationBackend()):
+        try:
+            run_pipeline(config)
+            assert False, "expected RuntimeError"
+        except RuntimeError as exc:
+            assert "503 UNAVAILABLE" in str(exc)
 
 
 def test_run_pipeline_custom_fasta_mode_with_tree(tmp_path):
