@@ -1,6 +1,15 @@
+from unittest.mock import patch
+
 import pytest
 
-from candy.config import DEFAULT_DATABASE_PREFERENCE, reorder_database_preference
+from candy.config import (
+    DEFAULT_DATABASE_PREFERENCE,
+    CAZyFamilyInput,
+    PipelineConfig,
+    Taxonomy,
+    default_tree_tool,
+    reorder_database_preference,
+)
 
 
 def test_reorder_moves_named_databases_to_front_in_given_order():
@@ -35,3 +44,37 @@ def test_reorder_deduplicates_repeated_names():
 def test_reorder_raises_on_unknown_database_name():
     with pytest.raises(ValueError, match="Unknown database name"):
         reorder_database_preference(["NOTAREALDB"])
+
+
+def test_default_tree_tool_is_fasttree_when_veryfasttree_has_no_wheel():
+    with patch("candy.config.is_macos_without_native_veryfasttree_wheel", return_value=True):
+        assert default_tree_tool() == "fasttree"
+
+
+def test_default_tree_tool_is_veryfasttree_otherwise():
+    with patch("candy.config.is_macos_without_native_veryfasttree_wheel", return_value=False):
+        assert default_tree_tool() == "veryfasttree"
+
+
+def test_pipeline_config_tree_tool_defaults_via_platform_detection():
+    # PipelineConfig() should pick up the platform-aware default automatically,
+    # not just a fixed literal -- Python API users benefit without needing to
+    # know about this quirk at all.
+    with patch("candy.config.is_macos_without_native_veryfasttree_wheel", return_value=True):
+        config = PipelineConfig(
+            input=CAZyFamilyInput(enzyme_class="GH", family_number=5, email="a@b.com", taxonomy=Taxonomy.ALL),
+            jobname="job",
+            output_dir=".",
+        )
+    assert config.tree_tool == "fasttree"
+
+
+def test_pipeline_config_tree_tool_explicit_value_overrides_default():
+    with patch("candy.config.is_macos_without_native_veryfasttree_wheel", return_value=True):
+        config = PipelineConfig(
+            input=CAZyFamilyInput(enzyme_class="GH", family_number=5, email="a@b.com", taxonomy=Taxonomy.ALL),
+            jobname="job",
+            output_dir=".",
+            tree_tool="veryfasttree",
+        )
+    assert config.tree_tool == "veryfasttree"

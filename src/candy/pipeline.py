@@ -17,8 +17,6 @@ domain detection, rather than threading a boolean through one path.
 from __future__ import annotations
 
 import logging
-import platform
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,6 +29,7 @@ from candy.clustering import get_clusterer
 from candy.config import CAZyFamilyInput, CustomFastaInput, PipelineConfig, Taxonomy
 from candy.curation import get_curation_backend
 from candy.phylogenetics import get_tree_builder
+from candy.platform_utils import is_apple_silicon_under_rosetta
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ _ROSETTA_WARNING = (
 
 
 def _warn_if_running_under_rosetta() -> None:
-    """Detect x86_64 Python running via Rosetta 2 translation on Apple Silicon.
+    """Warn about x86_64 Python running via Rosetta 2 translation on Apple Silicon.
 
     Surfaced by a real run: FAMSA's alignment step crashed with a SIGILL and
     no Python traceback at all (just the shell's own "illegal hardware
@@ -64,18 +63,7 @@ def _warn_if_running_under_rosetta() -> None:
     Rosetta. Warning about this *before* the (potentially long) clustering
     and curation stages run is much more useful than the crash itself.
     """
-    if platform.system() != "Darwin" or platform.machine() != "x86_64":
-        return
-    try:
-        translated = subprocess.run(
-            ["sysctl", "-n", "sysctl.proc_translated"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return
-    if translated.stdout.strip() == "1":
+    if is_apple_silicon_under_rosetta():
         logger.warning(_ROSETTA_WARNING)
 
 

@@ -15,6 +15,19 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
+from candy.platform_utils import is_macos_without_native_veryfasttree_wheel
+
+
+def default_tree_tool() -> str:
+    """'fasttree' on a Mac where veryfasttree has no reliable wheel, else 'veryfasttree'.
+
+    fasttree itself needs the conda environment (see README), but that's a
+    real, one-time, clearly-reported dependency -- preferable to defaulting
+    everyone on the affected Macs into a from-source build that's known to
+    fail, or a translated binary that's known to crash.
+    """
+    return "fasttree" if is_macos_without_native_veryfasttree_wheel() else "veryfasttree"
+
 
 class Taxonomy(str, Enum):
     ALL = "All"
@@ -167,7 +180,7 @@ class PipelineConfig:
 
     build_tree: bool = False
     alignment_tool: str = "famsa"
-    tree_tool: str = "veryfasttree"
+    tree_tool: str = field(default_factory=default_tree_tool)
 
     def __post_init__(self) -> None:
         self.output_dir = Path(self.output_dir)
