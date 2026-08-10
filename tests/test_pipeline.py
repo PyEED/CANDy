@@ -8,7 +8,6 @@ bioinformatics tools installed.
 """
 
 import xml.etree.ElementTree as ET
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pandas as pd
@@ -17,64 +16,18 @@ from candy.config import CAZyFamilyInput, ClusteringConfig, CurationConfig, Cust
 from candy.pipeline import _warn_if_running_under_rosetta, run_pipeline
 
 
-def test_warn_if_running_under_rosetta_warns_when_translated(caplog):
-    with patch("candy.pipeline.platform.system", return_value="Darwin"), patch(
-        "candy.pipeline.platform.machine", return_value="x86_64"
-    ), patch(
-        "candy.pipeline.subprocess.run",
-        return_value=SimpleNamespace(stdout="1\n"),
-    ):
+def test_warn_if_running_under_rosetta_warns_when_detected(caplog):
+    with patch("candy.pipeline.is_apple_silicon_under_rosetta", return_value=True):
         with caplog.at_level("WARNING"):
             _warn_if_running_under_rosetta()
 
     assert any("Rosetta" in record.message for record in caplog.records)
 
 
-def test_warn_if_running_under_rosetta_silent_when_native_arm64(caplog):
-    with patch("candy.pipeline.platform.system", return_value="Darwin"), patch(
-        "candy.pipeline.platform.machine", return_value="arm64"
-    ), patch("candy.pipeline.subprocess.run") as mock_run:
+def test_warn_if_running_under_rosetta_silent_when_not_detected(caplog):
+    with patch("candy.pipeline.is_apple_silicon_under_rosetta", return_value=False):
         with caplog.at_level("WARNING"):
             _warn_if_running_under_rosetta()
-
-    mock_run.assert_not_called()
-    assert caplog.records == []
-
-
-def test_warn_if_running_under_rosetta_silent_on_genuine_intel_mac(caplog):
-    # On a real Intel Mac, `sysctl -n sysctl.proc_translated` reports "0"
-    # (the key exists but the process isn't translated).
-    with patch("candy.pipeline.platform.system", return_value="Darwin"), patch(
-        "candy.pipeline.platform.machine", return_value="x86_64"
-    ), patch(
-        "candy.pipeline.subprocess.run",
-        return_value=SimpleNamespace(stdout="0\n"),
-    ):
-        with caplog.at_level("WARNING"):
-            _warn_if_running_under_rosetta()
-
-    assert caplog.records == []
-
-
-def test_warn_if_running_under_rosetta_silent_on_non_macos(caplog):
-    with patch("candy.pipeline.platform.system", return_value="Windows"), patch(
-        "candy.pipeline.subprocess.run"
-    ) as mock_run:
-        with caplog.at_level("WARNING"):
-            _warn_if_running_under_rosetta()
-
-    mock_run.assert_not_called()
-    assert caplog.records == []
-
-
-def test_warn_if_running_under_rosetta_tolerates_missing_sysctl(caplog):
-    # Defensive: sysctl.proc_translated not existing (or sysctl missing
-    # entirely) must never crash the pipeline over a best-effort warning.
-    with patch("candy.pipeline.platform.system", return_value="Darwin"), patch(
-        "candy.pipeline.platform.machine", return_value="x86_64"
-    ), patch("candy.pipeline.subprocess.run", side_effect=OSError("no such command")):
-        with caplog.at_level("WARNING"):
-            _warn_if_running_under_rosetta()  # must not raise
 
     assert caplog.records == []
 

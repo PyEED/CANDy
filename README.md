@@ -14,38 +14,50 @@ That's it for most users -- CANDy's default toolchain is fully bundled:
 
 - **Clustering**: [MMseqs2](https://github.com/soedinglab/MMseqs2) -- auto-downloaded and cached on first use (no conda needed). On Linux/macOS this just works. On **Windows**, MMseqs2's clustering workflows internally need a POSIX shell; the official Windows build handles this itself by installing a small helper (`busybox`) the first time it runs, which may ask for administrator permission **once** -- never again after that. (This mirrors upstream: MMseqs2's own docs list WSL as the recommended Windows path and this static build as the fallback for anyone who can't use WSL.)
 - **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.
-- **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed.
+- **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed. **Except on Apple Silicon Macs**: `veryfasttree` has no `macOS arm64` wheel at all (as of 4.0.4.1) and its from-source build fails on stock macOS (an upstream OpenMP-detection bug). CANDy detects this automatically and defaults `--tree-tool` to [FastTree](http://www.microbesonline.org/fasttree/) instead there -- see below.
 
 ### Apple Silicon (M1/M2/M3/M4) setup
 
-FAMSA and VeryFastTree ship native SIMD code. If your Python is x86_64 running under Rosetta 2 translation instead of native `arm64`, that's a known cause of a silent `illegal hardware instruction` crash during `--tree`, and can also make other native calls (e.g. the Gemini curation backend) unreliable. CANDy detects this at startup and logs a warning, but it's worth fixing properly rather than working around it -- **pip can't do this for you**: by the time `pip install` runs, the interpreter architecture is already fixed, so no package (including this one) can retroactively fix it. Two ways to get a correct native setup:
+There are two distinct, independent issues here -- you may hit either, both, or neither depending on your setup:
 
-**Option A -- [`uv`](https://docs.astral.sh/uv/) (recommended, one-time setup):** `uv` manages isolated Python installs and always defaults to the native architecture.
+**1. `--tree` crashes with `illegal hardware instruction`, no traceback.** This means your Python itself is x86_64 running under Rosetta 2 translation instead of native `arm64` -- FAMSA ships native SIMD code, and Rosetta's emulation of some CPU instructions is a known cause of exactly this crash (it can also make other native calls, e.g. Gemini curation, unreliable). CANDy logs a warning about this at startup if detected, but **pip can't fix it for you**: by the time `pip install` runs, the interpreter architecture is already fixed.
+
+**Step 0, always do this first:** confirm your *terminal itself* is native, not just your hardware:
 
 ```bash
-# only run the first line if you don't already have uv
-curl -LsSf https://astral.sh/uv/install.sh | sh   
-uv tool install candy-cazyme
+arch   # must print "arm64", not "i386"
 ```
 
-`uv tool install` gives you a `candy` command backed by its own isolated, native-arm64 Python -- no venv/PATH management needed. (Skip straight to Option B if `arch` below still reports `i386` after this -- see the Terminal note.)
+If it prints `i386`, your terminal app (Terminal/iTerm) is launching under Rosetta -- and anything installed from it, including tools like `uv` that are supposed to auto-detect the native architecture, will get fooled into installing x86_64 builds too. Fix this first: quit the app, Finder > select it > `Cmd+I` > uncheck "Open using Rosetta" > relaunch, then re-run `arch` to confirm.
+
+Once `arch` says `arm64`, two ways to get a correct native Python:
+
+**Option A -- [`uv`](https://docs.astral.sh/uv/) (recommended):** `uv` manages isolated Python installs and defaults to the native architecture -- *once its own install wasn't done under a translated shell* (see Step 0).
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh   # only if you don't already have uv
+uv python install 3.12
+uv tool install --python 3.12 "candy-cazyme[gemini]"
+```
+
+If you already ran `uv tool install` before fixing Step 0, it will have cached an x86_64 environment -- force it to redo the install natively:
+
+```bash
+uv tool uninstall candy-cazyme
+uv tool install --force --python 3.12 "candy-cazyme[gemini]"
+```
+
+This gives you a `candy` command backed by its own isolated, native-arm64 Python -- no venv/PATH management needed.
 
 **Option B -- Homebrew, manually:**
 
 ```bash
-# 1. Confirm your shell itself is running natively (should print "arm64"):
-arch
-
-# 2. If it printed "i386", your terminal app is running under Rosetta --
-#    quit it, then in Finder: select the app (Terminal/iTerm) > Cmd+I >
-#    uncheck "Open using Rosetta" > relaunch it, and re-run `arch`.
-
-# 3. Install (or confirm) Homebrew at the Apple Silicon prefix, /opt/homebrew
-#    (a pre-existing Homebrew at /usr/local is the Intel-only one):
+# Install (or confirm) Homebrew at the Apple Silicon prefix, /opt/homebrew
+# (a pre-existing Homebrew at /usr/local is the Intel-only one):
 /opt/homebrew/bin/brew --version || arch -arm64 /bin/bash -c \
   "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 4. Install Python from that prefix and use it explicitly:
+# Install Python from that prefix and use it explicitly:
 /opt/homebrew/bin/brew install python@3.12
 /opt/homebrew/bin/python3.12 -m venv .venv
 source .venv/bin/activate
@@ -58,13 +70,17 @@ Either way, verify before running a real job:
 python3 -c "import platform; print(platform.machine())"   # should print "arm64", not "x86_64"
 ```
 
-If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), a conda environment with those is still provided:
+**2. `--tree` fails to install or build `veryfasttree` (e.g. a CMake/OpenMP compiler error).** This is unrelated to Rosetta -- `veryfasttree` simply has no `macOS arm64` wheel at all, for any Python version, so it always falls back to a from-source build there, and that build fails on stock macOS due to an upstream bug (`find_package(OpenMP)` fails, since Apple's Clang has no OpenMP support out of the box, and `veryfasttree`'s CMake fallback for that case is itself broken). **You shouldn't normally hit this**: CANDy detects a Mac without a working native `veryfasttree` build and automatically defaults `--tree-tool` to `fasttree` instead, which *does* have a real `arm64` conda-forge/bioconda build (no compiling anything). That needs the bundled conda environment (a real, one-time dependency for this one platform):
 
 ```bash
-conda env create -f environment.yml   # only needed for CD-HIT as a clustering alternative to MMseqs2
+conda env create -f environment.yml
 conda activate candy
+candy GH173 --email you@example.com --tree   # --tree-tool defaults to fasttree here automatically
 ```
-and pass `--clustering-software cd-hit` / build a `PipelineConfig` with `alignment_tool="mafft"`, `tree_tool="fasttree"`.
+
+If you'd rather force `veryfasttree` anyway (e.g. you've solved the OpenMP build issue yourself), pass `--tree-tool veryfasttree` explicitly.
+
+If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), `environment.yml` provides CD-HIT and FastTree (`conda env create -f environment.yml && conda activate candy`, then `--clustering-software cd-hit --tree-tool fasttree`); MAFFT isn't included there (no `osx-arm64` build -- see above) and needs a separate install, e.g. `brew install mafft` on Intel Mac/Linux, then `--alignment-tool mafft`.
 
 To also enable automated Gemini-based domain-name curation, see [Domain-name curation](#domain-name-curation) below.
 
@@ -87,6 +103,10 @@ candy GH173 --email you@example.com --db-preference PFAM,SMART
 
 # Analyse your own FASTA file instead
 candy my_sequences.fasta --tree
+
+# Pick a specific MSA/phylogenetics backend explicitly (see Installation for
+# when you'd want to -- e.g. --tree-tool fasttree needs the conda environment)
+candy GH173 --email you@example.com --tree --alignment-tool mafft --tree-tool fasttree
 ```
 
 `--email` falls back to the `CANDY_EMAIL` environment variable, then an interactive prompt, so `export CANDY_EMAIL=you@example.com` once and just run `candy GH173` from then on. Run `candy --help` for the full list of options.

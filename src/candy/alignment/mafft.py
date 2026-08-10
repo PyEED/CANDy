@@ -19,7 +19,14 @@ class MafftAligner:
     name = "mafft"
 
     def align(self, input_fasta: Path, output_fasta: Path) -> Path:
-        binary = require_binary("mafft")
+        binary = require_binary(
+            "mafft",
+            hint=(
+                "Install it separately and ensure it's on PATH (e.g. `brew install mafft` on "
+                "Intel Mac/Linux, or see https://mafft.cbrc.jp/alignment/software/) -- it isn't "
+                "in CANDy's conda environment.yml, which has no macOS arm64 build for it."
+            ),
+        )
         logger.info("Aligning %s with MAFFT.", input_fasta)
         run_tool([binary, str(input_fasta)], stdout_path=output_fasta)
         return output_fasta

@@ -1,10 +1,20 @@
 # Optional. CANDy's default toolchain (MMseqs2 for clustering, FAMSA for MSA,
 # VeryFastTree for phylogenetics) ships via `pip install candy-cazyme` alone --
 # MSA/phylogenetics are bundled Python packages, and MMseqs2 is auto-downloaded
-# on first use. This environment is only needed if you specifically want
-# CD-HIT as the clustering backend instead of MMseqs2: CD-HIT has no official
-# Windows build and no pip-installable bindings, so (unlike MMseqs2) it can't
-# be auto-downloaded and must come from conda/bioconda.
+# on first use. This environment provides the non-default alternatives that
+# have no pip-installable bindings:
+#   - cd-hit:   clustering alternative to MMseqs2 (--clustering-software cd-hit).
+#               No official Windows build and no pip bindings at all.
+#   - fasttree: phylogenetics alternative to VeryFastTree (--tree-tool fasttree).
+#               This is also CANDy's *default* on a Mac where VeryFastTree has
+#               no working native build (Apple Silicon, or an x86_64 Python
+#               under Rosetta translation) -- see the README's Apple Silicon
+#               setup section.
+# MAFFT (the alternative to FAMSA, --alignment-tool mafft) is deliberately
+# NOT included here: bioconda has no osx-arm64 build for it, which would
+# break `conda env create` on Apple Silicon entirely -- exactly the platform
+# that needs this file for fasttree. Install MAFFT separately if you want it
+# (e.g. `brew install mafft` on Intel Mac/Linux, or see mafft.cbrc.jp).
 name: candy
 channels:
   - bioconda
@@ -13,5 +23,6 @@ dependencies:
   - python>=3.10
   - pip
   - cd-hit
+  - fasttree
   - pip:
       - -e .

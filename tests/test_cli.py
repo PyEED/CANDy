@@ -255,3 +255,53 @@ def test_cli_no_db_preference_uses_default_order(tmp_path, monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert captured["config"].domain_cleaning.database_preference == DEFAULT_DATABASE_PREFERENCE
+
+
+def test_cli_tree_tool_and_alignment_tool_default_to_platform_detection(tmp_path, monkeypatch):
+    # Not passing --tree-tool/--alignment-tool should leave PipelineConfig's
+    # own platform-aware default_factory in charge, not a fixed CLI default.
+    captured = {}
+
+    def fake_run_pipeline(config):
+        captured["config"] = config
+        return _fake_pipeline_result(tmp_path)
+
+    monkeypatch.setattr("candy.cli.run_pipeline", fake_run_pipeline)
+    monkeypatch.setattr("candy.config.is_macos_without_native_veryfasttree_wheel", lambda: True)
+
+    result = runner.invoke(app, ["GH173", "--email", "you@example.com"])
+
+    assert result.exit_code == 0, result.output
+    assert captured["config"].tree_tool == "fasttree"
+    assert captured["config"].alignment_tool == "famsa"
+
+
+def test_cli_explicit_tree_tool_overrides_platform_default(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_pipeline(config):
+        captured["config"] = config
+        return _fake_pipeline_result(tmp_path)
+
+    monkeypatch.setattr("candy.cli.run_pipeline", fake_run_pipeline)
+    monkeypatch.setattr("candy.config.is_macos_without_native_veryfasttree_wheel", lambda: True)
+
+    result = runner.invoke(app, ["GH173", "--email", "you@example.com", "--tree-tool", "veryfasttree"])
+
+    assert result.exit_code == 0, result.output
+    assert captured["config"].tree_tool == "veryfasttree"
+
+
+def test_cli_explicit_alignment_tool_is_passed_through(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_run_pipeline(config):
+        captured["config"] = config
+        return _fake_pipeline_result(tmp_path)
+
+    monkeypatch.setattr("candy.cli.run_pipeline", fake_run_pipeline)
+
+    result = runner.invoke(app, ["GH173", "--email", "you@example.com", "--alignment-tool", "mafft"])
+
+    assert result.exit_code == 0, result.output
+    assert captured["config"].alignment_tool == "mafft"

@@ -81,6 +81,18 @@ def main(
         + ", ".join(DEFAULT_DATABASE_PREFERENCE) + ".",
     ),
     build_tree: bool = typer.Option(False, "--tree/--no-tree", help="Run MSA + phylogenetics + iTOL export."),
+    alignment_tool: Optional[str] = typer.Option(
+        None,
+        help="MSA backend: 'famsa' (default; bundled, no setup needed) or 'mafft' (must be installed "
+        "separately and be on PATH -- not available via CANDy's conda environment.yml, which has no "
+        "macOS arm64 build for it; see README).",
+    ),
+    tree_tool: Optional[str] = typer.Option(
+        None,
+        help="Phylogenetics backend: 'veryfasttree' or 'fasttree'. Defaults to 'veryfasttree', except "
+        "on a Mac where it has no working native build (Apple Silicon, or Rosetta translation), where "
+        "it defaults to 'fasttree' instead (needs the conda environment; see README).",
+    ),
     curation_backend: str = typer.Option(
         "manual", help="Domain-name curation backend: 'manual' or 'gemini'."
     ),
@@ -145,6 +157,12 @@ def main(
     else:
         database_preference = list(DEFAULT_DATABASE_PREFERENCE)
 
+    tool_kwargs = {}
+    if alignment_tool:
+        tool_kwargs["alignment_tool"] = alignment_tool
+    if tree_tool:
+        tool_kwargs["tree_tool"] = tree_tool
+
     config = PipelineConfig(
         input=pipeline_input,
         jobname=_sanitize_jobname(jobname or default_jobname),
@@ -158,6 +176,7 @@ def main(
         curation=CurationConfig(backend=curation_backend, api_key=curation_api_key, model=curation_model),
         blast_identity_threshold=blast_identity,
         build_tree=build_tree,
+        **tool_kwargs,
     )
 
     try:
