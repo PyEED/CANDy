@@ -3,7 +3,16 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-import veryfasttree
+try:
+    import veryfasttree
+except ImportError as exc:  # pragma: no cover -- exercised only where the wheel is genuinely absent
+    raise ImportError(
+        "The 'veryfasttree' package is not installed. On macOS arm64 (Apple Silicon), this is "
+        "deliberate -- veryfasttree has no native wheel there and CANDy defaults to --tree-tool "
+        "fasttree instead (see the README's Apple Silicon setup section). To force veryfasttree "
+        "anyway, `pip install veryfasttree` yourself -- it will attempt a from-source build, which "
+        "is known to fail on stock macOS due to an upstream OpenMP-detection bug."
+    ) from exc
 
 logger = logging.getLogger(__name__)
 
