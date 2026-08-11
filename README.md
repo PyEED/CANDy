@@ -14,7 +14,7 @@ That's it for most users -- CANDy's default toolchain is fully bundled:
 
 - **Clustering**: [MMseqs2](https://github.com/soedinglab/MMseqs2) -- auto-downloaded and cached on first use (no conda needed). On Linux/macOS this just works. On **Windows**, MMseqs2's clustering workflows internally need a POSIX shell; the official Windows build handles this itself by installing a small helper (`busybox`) the first time it runs, which may ask for administrator permission **once** -- never again after that. (This mirrors upstream: MMseqs2's own docs list WSL as the recommended Windows path and this static build as the fallback for anyone who can't use WSL.)
 - **MSA**: [FAMSA](https://github.com/refresh-bio/FAMSA) via [`pyfamsa`](https://github.com/althonos/pyfamsa) -- a real pip dependency, runs in-process, no download needed.
-- **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed. **Except on Apple Silicon Macs**: `veryfasttree` has no `macOS arm64` wheel at all (as of 4.0.4.1) and its from-source build fails on stock macOS (an upstream OpenMP-detection bug). CANDy detects this automatically and defaults `--tree-tool` to [FastTree](http://www.microbesonline.org/fasttree/) instead there -- see below.
+- **Phylogenetics**: [VeryFastTree](https://github.com/citiususc/veryfasttree) via [`veryfasttree`](https://github.com/citiususc/veryfasttree-python) -- also a real pip dependency, no download needed. **Except on Apple Silicon Macs**: `veryfasttree` has no `macOS arm64` wheel at all (as of 4.0.4.1), so CANDy skips it there entirely and defaults `--tree-tool` to [FastTree](https://github.com/morgannprice/fasttree) instead, which auto-downloads (Linux/Windows) or auto-compiles from a single dependency-free C file (macOS) on first use, cached afterward -- no conda needed there either. See below.
 
 ### Apple Silicon (M1/M2/M3/M4) setup
 
@@ -70,21 +70,22 @@ Either way, verify before running a real job:
 python3 -c "import platform; print(platform.machine())"   # should print "arm64", not "x86_64"
 ```
 
-**2. `--tree` fails to install or build `veryfasttree` (e.g. a CMake/OpenMP compiler error).** This is unrelated to Rosetta -- `veryfasttree` simply has no `macOS arm64` wheel at all, for any Python version, so it always falls back to a from-source build there, and that build fails on stock macOS due to an upstream bug (`find_package(OpenMP)` fails, since Apple's Clang has no OpenMP support out of the box, and `veryfasttree`'s CMake fallback for that case is itself broken). **You shouldn't normally hit this**: CANDy detects a Mac without a working native `veryfasttree` build and automatically defaults `--tree-tool` to `fasttree` instead, which *does* have a real `arm64` conda-forge/bioconda build (no compiling anything). That needs the bundled conda environment (a real, one-time dependency for this one platform):
+**2. `--tree` fails to install or build `veryfasttree` (e.g. a CMake/OpenMP compiler error).** This is unrelated to Rosetta -- `veryfasttree` simply has no `macOS arm64` wheel at all, for any Python version, so `pip`/`uv` would otherwise try to build it from source there, and that build fails on stock macOS due to an upstream bug (`find_package(OpenMP)` fails, since Apple's Clang has no OpenMP support out of the box, and `veryfasttree`'s CMake fallback for that case is itself broken). **You shouldn't hit this at all as of `candy-cazyme` 3.0.4+**: on a Mac without a working native `veryfasttree` build, CANDy both skips it as an install-time dependency entirely (so nothing tries to build it) and defaults `--tree-tool` to `fasttree` instead -- which auto-downloads a precompiled binary (Linux/Windows) or, on macOS specifically (no precompiled binary is published upstream), auto-compiles one from a single dependency-free C source file using whatever C compiler is already on your machine (Xcode Command Line Tools' `clang`, already present on essentially every real Mac). No conda needed. This happens once and is cached, the same way MMseqs2 auto-downloads itself.
+
+If that auto-compile step ever fails (e.g. genuinely no compiler on PATH), the error message tells you to run `xcode-select --install`, or you can still fall back to the bundled conda environment:
 
 ```bash
 conda env create -f environment.yml
 conda activate candy
-candy GH173 --email you@example.com --tree   # --tree-tool defaults to fasttree here automatically
 ```
 
-If you'd rather force `veryfasttree` anyway (e.g. you've solved the OpenMP build issue yourself), pass `--tree-tool veryfasttree` explicitly.
+If you'd rather force `veryfasttree` anyway (e.g. you've solved the OpenMP build issue yourself), `pip install veryfasttree` explicitly and pass `--tree-tool veryfasttree`.
 
 If you'd rather use the original CD-HIT/MAFFT/FastTree tools instead (e.g. to reproduce results bit-for-bit against the published notebook), `environment.yml` provides CD-HIT and FastTree (`conda env create -f environment.yml && conda activate candy`, then `--clustering-software cd-hit --tree-tool fasttree`); MAFFT isn't included there (no `osx-arm64` build -- see above) and needs a separate install, e.g. `brew install mafft` on Intel Mac/Linux, then `--alignment-tool mafft`.
 
 To also enable automated Gemini-based domain-name curation, see [Domain-name curation](#domain-name-curation) below.
 
-If you'd rather not have CANDy download anything automatically (e.g. air-gapped environments), set `CANDY_NO_AUTO_DOWNLOAD=1` -- clustering will then require `mmseqs`/`cd-hit` already on PATH.
+If you'd rather not have CANDy download anything automatically (e.g. air-gapped environments), set `CANDY_NO_AUTO_DOWNLOAD=1` -- clustering will then require `mmseqs`/`cd-hit`, and `--tree-tool fasttree` will require `FastTree`, already on PATH.
 
 ## Usage
 
