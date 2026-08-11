@@ -8,8 +8,11 @@
 #   - fasttree: phylogenetics alternative to VeryFastTree (--tree-tool fasttree).
 #               This is also CANDy's *default* on a Mac where VeryFastTree has
 #               no working native build (Apple Silicon, or an x86_64 Python
-#               under Rosetta translation) -- see the README's Apple Silicon
-#               setup section.
+#               under Rosetta translation) -- but CANDy auto-downloads/compiles
+#               its own copy of FastTree there when needed (see
+#               candy.phylogenetics.fasttree_download), so this conda package
+#               is only needed as a fallback (e.g. no C compiler available) or
+#               if you specifically want the conda-provided build instead.
 # MAFFT (the alternative to FAMSA, --alignment-tool mafft) is deliberately
 # NOT included here: bioconda has no osx-arm64 build for it, which would
 # break `conda env create` on Apple Silicon entirely -- exactly the platform

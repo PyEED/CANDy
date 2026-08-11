@@ -18,16 +18,16 @@ def test_mafft_aligner_invokes_binary_with_stdout_redirect(tmp_path):
     assert kwargs["stdout_path"] == output_fasta
 
 
-def test_fasttree_builder_falls_back_to_lowercase_binary_name(tmp_path):
+def test_fasttree_builder_uses_resolved_binary(tmp_path):
+    # Binary resolution itself (PATH, cache, auto-download/compile) is
+    # tested in tests/test_fasttree_download.py; this just verifies
+    # FastTreeBuilder wires the resolved path through to run_tool correctly.
     alignment = tmp_path / "aligned.fasta"
     output = tmp_path / "tree.nwk"
 
-    def fake_find_binary(name):
-        return "/usr/bin/fasttree" if name == "fasttree" else None
-
-    with patch("candy.phylogenetics.fasttree.find_binary", side_effect=fake_find_binary), patch(
-        "candy.phylogenetics.fasttree.run_tool"
-    ) as mock_run:
+    with patch(
+        "candy.phylogenetics.fasttree.resolve_fasttree_binary", return_value="/usr/bin/fasttree"
+    ), patch("candy.phylogenetics.fasttree.run_tool") as mock_run:
         FastTreeBuilder().build_tree(alignment, output)
 
     args, kwargs = mock_run.call_args
