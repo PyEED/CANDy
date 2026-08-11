@@ -30,7 +30,14 @@ dependencies = [
     "typer>=0.12",
     "lxml>=5.0",
     "pyfamsa>=0.5",
-    "veryfasttree>=4.0",
+    # No macOS arm64 wheel exists for this (as of 4.0.4.1) -- installing it
+    # there falls back to a from-source build that's known to fail (an
+    # upstream OpenMP-detection bug). CANDy already defaults to fasttree
+    # instead on exactly this platform (see config.default_tree_tool), so
+    # skip the dependency there entirely rather than failing every install.
+    # Still installed on Intel Mac (a real x86_64 wheel exists) and under
+    # Rosetta translation (ditto) -- neither of those needs a source build.
+    "veryfasttree>=4.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "platformdirs>=4.0",
 ]
 
